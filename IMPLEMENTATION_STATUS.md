@@ -1,7 +1,23 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-13  
-**フェーズ**: iOS寄付課金（App内課金）対応
+**フェーズ**: iOSビルドCIのコスト最適化・gRPC-Coreパッチ修正
+
+## 62. iOSビルドCIのコスト最適化・gRPC-Coreパッチ修正（2026-07-13）
+- GitHub Actionsで`build-ios`（macOSランナー）を試行錯誤していたところ、
+  「recent account payments have failed or your spending limit needs to be increased」
+  というエラーでActionsが起動不能になった。原因はmacOSランナーがLinuxの10倍の
+  Actions分数を消費するため、Podfile修正のたびにpushして再ビルドを繰り返したことで
+  アカウントの支出上限に達したこと（同日、Potion Kitchenでも同じ問題が発生した記録あり）
+- **`build-ios`ジョブを`pull_request`または`workflow_dispatch`（手動実行）でのみ
+  起動するようゲート**。通常の`push`では走らなくなり、無料枠のtest/build-android
+  （ubuntu-latest）のみが実行される構成に変更
+- あわせて`basic_seq.h`パッチの対象漏れも修正: このヘッダーファイルは`gRPC-Core`と
+  `gRPC-C++`の2つのPodにそれぞれ同一内容がコピーされて存在しており、修正対象を
+  `Pods/`配下の再帰検索（`Dir.glob`）に変更し、両方に確実にパッチが当たるようにした
+- **⏸ ユーザー待ち**: GitHub（`funvestment1-svg`アカウント）のBilling & plansで
+  支払い方法・支出上限を確認・対応してから、Actionsタブで`build-ios`を
+  手動実行（workflow_dispatch）して動作確認してください
 
 ## 61. iOS寄付課金（App内課金）対応（2026-07-13）
 - 「IOSの寄付課金を追加したい」という要望を受け対応。`in_app_purchase`パッケージは
