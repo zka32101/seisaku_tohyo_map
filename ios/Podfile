@@ -41,11 +41,24 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
 
     # 一部のPodがIPHONEOS_DEPLOYMENT_TARGETを非常に古い値（iOS10.0など）のまま
-    # 指定しているため、新しいXcodeで "unsupported option '-G' for target
-    # 'arm64-apple-iosXX.X'" というビルドエラーが発生する。
-    # 全Podのターゲットをアプリ本体と同じ13.0に強制的に揃えることで回避する。
+    # 指定していたため、全Podのターゲットをアプリ本体と同じ13.0に揃える。
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    end
+
+    # firebase_core/cloud_firestore等が依存するBoringSSL-GRPCは、ファイル単位の
+    # コンパイラフラグに "-GCC_WARN_INHIBIT_ALL_WARNINGS" を設定しているが、
+    # 新しいClang（Xcode 16以降）がこれを正しく解釈できず "-G" とみなして
+    # "unsupported option '-G'" というビルドエラーになる既知の問題がある。
+    # 該当フラグを取り除くことで回避する。
+    if target.name == 'BoringSSL-GRPC'
+      target.source_build_phase.files.each do |file|
+        if file.settings && file.settings['COMPILER_FLAGS']
+          flags = file.settings['COMPILER_FLAGS'].split
+          flags.reject! { |flag| flag == '-GCC_WARN_INHIBIT_ALL_WARNINGS' }
+          file.settings['COMPILER_FLAGS'] = flags.join(' ')
+        end
+      end
     end
   end
 end
