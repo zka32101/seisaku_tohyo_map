@@ -18,13 +18,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'iOS向けのFirebase設定が未登録です。Firebase Console '
-          '（プロジェクト: petit-works-apps-9029a）で iOS アプリを追加し'
-          '（Bundle ID: com.yourwish.japanfuturemap）、'
-          'ダウンロードした GoogleService-Info.plist の値をもとに '
-          'このファイルに `ios` という名前の FirebaseOptions を追加してください。',
-        );
+        return ios;
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
@@ -40,14 +34,15 @@ class DefaultFirebaseOptions {
     storageBucket: 'petit-works-apps-9029a.firebasestorage.app',
   );
 
-  // iOS向けアプリをFirebase Consoleに追加後、GoogleService-Info.plistの値で
-  // 以下のようなFirebaseOptionsを追加し、上のswitch文からreturn iosに差し替えてください。
-  // static const FirebaseOptions ios = FirebaseOptions(
-  //   apiKey: '...',
-  //   appId: '1:216377882454:ios:...',
-  //   messagingSenderId: '216377882454',
-  //   projectId: 'petit-works-apps-9029a',
-  //   storageBucket: 'petit-works-apps-9029a.firebasestorage.app',
-  //   iosBundleId: 'com.yourwish.japanfuturemap',
-  // );
+  // 注意: iOS版はAndroid版（petit-works-apps-9029a）とは別のFirebaseプロジェクト
+  // （apps2-752cb、他アプリと共用）に接続する構成。ユーザーの明示的な選択により、
+  // OS間でFirestoreデータ（投票・コメント・提案等）は共有されない。
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyC4gaFcLxN8iT7xm6JeIM7Iou-efE5g5SM',
+    appId: '1:946448575860:ios:0fd631a6510c7fab37d021',
+    messagingSenderId: '946448575860',
+    projectId: 'apps2-752cb',
+    storageBucket: 'apps2-752cb.firebasestorage.app',
+    iosBundleId: 'com.yourwish.japanfuturemap',
+  );
 }

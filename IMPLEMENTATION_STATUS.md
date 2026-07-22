@@ -1,7 +1,26 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-13  
-**フェーズ**: Apple Developer登録手順のドキュメント化
+**フェーズ**: iOS版Firebase設定完了（GoogleService-Info.plist配置）
+
+## 65. iOS版Firebase設定完了（GoogleService-Info.plist配置）（2026-07-13）
+- ユーザーがFirebase ConsoleでiOSアプリを追加し取得した`GoogleService-Info.plist`を
+  `ios/Runner/`に配置し、`lib/firebase_options.dart`の`ios`ブロックに実際の値を設定。
+  `currentPlatform`のswitch文もiOSで`UnsupportedError`を投げる状態から`return ios;`に変更
+- **⚠️ 重要な仕様上の注意（ユーザー確認済み・承知の上で採用）**: iOS版が接続するFirebase
+  プロジェクトは`apps2-752cb`で、Android版が使う`petit-works-apps-9029a`とは**別プロジェクト**。
+  ユーザーに確認したところ「apps2-752cbのまま進める」という明示的な選択があったため、
+  この構成のまま実装。**この結果、iOS版とAndroid版でFirestoreデータ（課題への投票・
+  コメント・みんなの提案など）は共有されない**（OSごとに別々のデータベースに書き込まれる）。
+  将来的にデータ統合が必要になった場合は、iOS側を`petit-works-apps-9029a`に登録し直す
+  対応が必要になる
+- `ios/Runner.xcodeproj/project.pbxproj`に`GoogleService-Info.plist`のPBXFileReference・
+  PBXBuildFile・Resourcesビルドフェーズへの参照を追加し、Xcodeビルド時にアプリバンドルへ
+  正しく含まれるよう配線（ファイルを`ios/Runner/`に置くだけでは不十分なため）
+
+**確認事項**:
+- ✅ 全35テスト通過
+- ⏸ Xcode実機ビルドでの動作確認は未実施（Mac環境が必要）
 
 ## 64. Apple Developer登録手順のドキュメント化（2026-07-13）
 - 「APPLEのAPP登録方法」という質問を受け、USER_PROCEDURE.mdに新セクション
