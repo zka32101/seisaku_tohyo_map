@@ -1,0 +1,90 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  build-android:
+    name: Build Android APK (debug)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+  build-ios:
+    name: Build iOS (unsigned)
+    runs-on: macos-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # GoogleService-Info.plist は未登録のためこのジョブでは配置していない。
+      # Firebase Console で iOS アプリを追加後、内容を Base64 化して
+      # Actions Secrets（例: IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64）に登録し、
+      # 以下のようなステップをこの前に追加すること:
+      #   - name: Write GoogleService-Info.plist
+      #     run: echo "${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64 }}" | base64 -d > ios/Runner/GoogleService-Info.plist
+      # あわせて lib/firebase_options.dart の ios ブロックも実際の値で埋めること。
+
+      # Apple Developer Program登録・証明書/プロビジョニングプロファイルが未設定のため、
+      # ここではコード署名なしのビルド（コンパイルが通るかの確認）のみ行う。
+      # 実機インストールやApp Store配信には、証明書・プロファイルをSecretsに登録した上で
+      # `flutter build ipa` へ切り替え、fastlane等でTestFlight/App Storeにアップロードする工程が別途必要。
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.ipa
+          path: build/ios/iphoneos/Runner.app
