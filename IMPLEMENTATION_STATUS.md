@@ -1,7 +1,22 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-13  
-**フェーズ**: iOS Bundle ID変更・Push通知Entitlements追加
+**フェーズ**: Apple Developer登録手順のドキュメント化
+
+## 64. Apple Developer登録手順のドキュメント化（2026-07-13）
+- 「APPLEのAPP登録方法」という質問を受け、USER_PROCEDURE.mdに新セクション
+  「0.1. Appleへのアプリ登録手順」を追加（すべてブラウザから行える手順、Mac不要）
+  - Step 1: Apple Developer Program登録（年間$99）
+  - Step 2: App ID作成（Bundle ID: `com.yourwish.japanfuturemap`、Push Notifications有効化）
+  - Step 3: App Store Connectで新規アプリ登録（名前・言語・Bundle ID・SKU）
+  - Step 4: プッシュ通知用APNs認証キー発行 → Firebase Consoleへの登録手順
+  - Step 5: 寄付機能の商品登録（既存の3.7セクションを参照）
+  - Step 6: 税務・銀行・連絡先情報の入力（App内課金に必須）
+  - Step 7: アイコン・スクリーンショット等のストア掲載情報
+  - Step 8: Mac環境でのビルド・提出（既存の「0.」セクションへ接続）
+- あわせて「0.」セクション内の古い記述（「ローカルではgit初期化されていません」）を、
+  実際にpush済みのリポジトリ（`petitworksappsdev-hash/nihon_future_map`）を踏まえて更新
+- コード変更なし（ドキュメントのみ）のため、テスト・ビルドは実施していない
 
 ## 63. iOS Bundle ID変更・Push通知Entitlements追加（2026-07-13）
 - ユーザー指定によりiOS Bundle IDを`com.petitworks.nihonFutureMap`（実際にはRunnerTests側のみ

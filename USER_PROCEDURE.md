@@ -28,12 +28,72 @@ Claude側では完結できない、お手元での作業手順をまとめて�
 ### GitHub Actionsで実行する場合
 `.github/workflows/flutter_ci.yml` に `build-ios` ジョブを追加済み（`macos-latest`で
 `flutter build ios --release --no-codesign` を実行し、コンパイルが通るかを確認するだけの内容）。
-実際に動かすには:
-1. このプロジェクトをGitHubリポジトリにpush（**現状ローカルではgit初期化されていません**。
-   `git init` → `git remote add origin ...` → pushが必要）
-2. push後、GitHubの「Actions」タブでワークフローの実行結果を確認
+リポジトリは`petitworksappsdev-hash/nihon_future_map`にpush済み（軽量アカウント、
+コスト最適化のため`build-ios`はPRまたは手動実行`workflow_dispatch`でのみ起動）。
+1. GitHubの「Actions」タブでワークフローの実行結果を確認
+2. 手動実行する場合は Actions タブ → Flutter CI → 「Run workflow」
 3. GoogleService-Info.plist取得後は、内容をBase64化してActions Secretsに登録し、
    ワークフロー内のコメントを参考に配置ステップを追加
+
+---
+
+## 0.1. Appleへのアプリ登録手順
+
+「0. iOS版のビルドについて」の前提となる、Apple側での登録作業を順番にまとめています。
+**すべてMac不要でブラウザから行えます**（macOSが必要になるのは実際のビルド・提出時のみ）。
+
+### Step 1: Apple Developer Program登録
+1. https://developer.apple.com/programs/ にアクセスし、Apple ID でサインイン
+   （個人 or 法人名義を選択。年間 **$99**）
+2. 登録には1〜2日かかる場合があります（本人確認・法人の場合は追加審査あり）
+
+### Step 2: App IDの作成（Bundle IDの登録）
+1. https://developer.apple.com/account/resources/identifiers/list を開く
+2. 「+」→「App IDs」→「App」を選択
+3. Description: `Nihon Future Map`（任意の管理用名称）
+4. Bundle ID: **Explicit** を選択し、`com.yourwish.japanfuturemap` と入力
+   （コード側で既にこの値に統一済み）
+5. Capabilities（機能）で以下にチェック:
+   - ✅ **Push Notifications**（`firebase_messaging`のため必須）
+   - **In-App Purchase**（寄付機能）はチェック不要 — 全App IDにデフォルトで有効
+6. 「Continue」→「Register」で登録完了
+
+### Step 3: App Store Connectで新規アプリを登録
+1. https://appstoreconnect.apple.com/apps を開く（Apple Developer Program登録完了後に利用可能）
+2. 「+」→「新規App」
+3. プラットフォーム: iOS
+4. 名前: 「日本の未来マップ」（またはApp Store掲載名。他アプリと重複不可）
+5. プライマリ言語: 日本語
+6. Bundle ID: Step 2で作成した `com.yourwish.japanfuturemap` を選択
+7. SKU: 任意の一意な文字列（例: `nihonfuturemap001`。ユーザーには非表示）
+8. 「作成」で登録完了
+
+### Step 4: プッシュ通知用のAPNs認証キーを発行
+1. https://developer.apple.com/account/resources/authkeys/list を開く
+2. 「+」→ キー名を入力（例: `Nihon Future Map APNs Key`）
+3. 「Apple Push Notifications service (APNs)」にチェック → 「Continue」→「Register」
+4. `.p8`ファイルをダウンロード（**再ダウンロード不可のため必ず保管**）。
+   あわせて画面に表示される **Key ID** と、Apple Developerアカウントの **Team ID**
+   （右上のメンバーシップ詳細で確認可）も控えておく
+5. Firebase Console → プロジェクト設定 → Cloud Messaging → Apple アプリの設定 →
+   「APNs 認証キー」に、上記の`.p8`ファイル・Key ID・Team IDをアップロード
+
+### Step 5: 寄付機能（App内課金）の商品登録
+「3.7. 寄付機能（App Store課金）の商品登録（iOS）」を参照（Step 3のアプリ登録完了後に実施）
+
+### Step 6: 税務・銀行・連絡先情報の入力（有料機能を使う場合は必須）
+App Store Connect → 契約/税金/口座情報（Agreements, Tax, and Banking）で、
+銀行口座・税務情報を入力しないと、Step 5のApp内課金が承認されません
+（アプリ自体を無料で審査提出するだけならこの手順は不要）
+
+### Step 7: アプリアイコン・スクリーンショット等のストア掲載情報を準備
+- アプリアイコン: 1024×1024px（現状Flutterデフォルトのまま、差し替えが必要）
+- スクリーンショット: 主要デバイスサイズ（6.9インチ・6.5インチ等）ごとに数枚
+- プライバシーポリシーURL、アプリの説明文、キーワード等
+
+### Step 8: Mac環境でのビルド・提出
+「0. iOS版のビルドについて」の手順（`flutter build ipa`、Xcode/Transporterでのアップロード、
+または上記GitHub Actionsのworkflow_dispatch実行）に進む
 4. 実機インストール・App Store配信まで行うには、Apple Developer証明書・プロビジョニング
    プロファイルをSecretsに登録し、`flutter build ipa` ＋ fastlane等でのアップロード工程を追加
 
