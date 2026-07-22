@@ -61,4 +61,21 @@ post_install do |installer|
       end
     end
   end
+
+  # gRPC-Core（cloud_firestore等が依存）のC++コードが、新しいClang（Xcode 16.3以降）の
+  # 厳密なテンプレート構文チェックに引っかかり "A template argument list is expected
+  # after a name prefixed by the template keyword" というパースエラーになる既知の問題がある
+  # （https://github.com/grpc/grpc/issues/39458）。該当箇所に空のテンプレート引数リスト
+  # <> を補うパッチを当てて回避する。
+  basic_seq_path = File.join(
+    __dir__, 'Pods', 'gRPC-Core', 'src', 'core', 'lib', 'promise', 'detail', 'basic_seq.h'
+  )
+  if File.exist?(basic_seq_path)
+    content = File.read(basic_seq_path)
+    patched = content.gsub(
+      'Traits::template CallSeqFactory(f_, *cur_, std::move(arg));',
+      'Traits::template CallSeqFactory<>(f_, *cur_, std::move(arg));'
+    )
+    File.write(basic_seq_path, patched) if patched != content
+  end
 end
