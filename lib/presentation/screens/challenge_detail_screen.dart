@@ -1216,6 +1216,7 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
         () => ActivityStore().incrementCommentsPosted(),
       );
       _controller.clear();
+      if (!mounted) return;
       FocusScope.of(context).unfocus();
       if (newlyUnlocked.isNotEmpty && mounted) {
         showAchievementUnlockDialogs(context, newlyUnlocked);

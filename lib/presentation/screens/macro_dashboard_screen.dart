@@ -89,6 +89,9 @@ class MacroDashboardScreen extends ConsumerWidget {
               _DashboardSection(
                 title: '人口はどれだけ減る？',
                 subtitle: '2023年 → 2070年',
+                footnote:
+                    '${dashboard.populationTrend.first.population.toStringAsFixed(0)}百万人 → '
+                    '${dashboard.populationTrend.last.population.toStringAsFixed(0)}百万人',
                 child: SizedBox(
                   height: 220,
                   child: LineChart(
@@ -173,9 +176,6 @@ class MacroDashboardScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                footnote:
-                    '${dashboard.populationTrend.first.population.toStringAsFixed(0)}百万人 → '
-                    '${dashboard.populationTrend.last.population.toStringAsFixed(0)}百万人',
               ),
 
               OutlinedButton.icon(
@@ -234,6 +234,10 @@ class MacroDashboardScreen extends ConsumerWidget {
               _DashboardSection(
                 title: 'エネルギーは自分の国でまかなえている？',
                 subtitle: '2000年 → 2025年',
+                footnote:
+                    'エネルギー自給率 '
+                    '${dashboard.energySelfSufficiency.last.selfSufficiencyRate.toStringAsFixed(1)}%'
+                    '（主要国の中でも低水準）',
                 child: SizedBox(
                   height: 180,
                   child: LineChart(
@@ -320,15 +324,14 @@ class MacroDashboardScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                footnote:
-                    'エネルギー自給率 '
-                    '${dashboard.energySelfSufficiency.last.selfSufficiencyRate.toStringAsFixed(1)}%'
-                    '（主要国の中でも低水準）',
               ),
 
               _DashboardSection(
                 title: '医療費はどれだけ増えている？',
                 subtitle: '2000年 → 2025年 国民医療費',
+                footnote:
+                    '${dashboard.healthcareCostTrend.first.totalCost.toStringAsFixed(1)}兆円 → '
+                    '${dashboard.healthcareCostTrend.last.totalCost.toStringAsFixed(1)}兆円',
                 child: SizedBox(
                   height: 180,
                   child: LineChart(
@@ -410,9 +413,6 @@ class MacroDashboardScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                footnote:
-                    '${dashboard.healthcareCostTrend.first.totalCost.toStringAsFixed(1)}兆円 → '
-                    '${dashboard.healthcareCostTrend.last.totalCost.toStringAsFixed(1)}兆円',
               ),
               const SizedBox(height: AppSpacing.md),
 
