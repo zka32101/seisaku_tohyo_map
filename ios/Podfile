@@ -72,10 +72,20 @@ post_install do |installer|
   )
   if File.exist?(basic_seq_path)
     content = File.read(basic_seq_path)
+    # 完全一致ではなく部分一致の正規表現に変更（`return`の有無や空白差分に
+    # 依存させないため）。同じパターンがファイル内に複数あっても全て補正する。
     patched = content.gsub(
-      'Traits::template CallSeqFactory(f_, *cur_, std::move(arg));',
-      'Traits::template CallSeqFactory<>(f_, *cur_, std::move(arg));'
+      /Traits::template CallSeqFactory\(/,
+      'Traits::template CallSeqFactory<>('
     )
-    File.write(basic_seq_path, patched) if patched != content
+    if patched != content
+      File.write(basic_seq_path, patched)
+      puts "[Podfile] Patched gRPC-Core basic_seq.h template call syntax"
+    else
+      puts "[Podfile] gRPC-Core basic_seq.h did not match the expected pattern " \
+           "(already patched upstream, or the source changed) — no patch applied"
+    end
+  else
+    puts "[Podfile] gRPC-Core basic_seq.h not found at #{basic_seq_path} — skipping patch"
   end
 end
