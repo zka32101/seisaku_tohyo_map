@@ -21,7 +21,7 @@ class DefaultFirebaseOptions {
         throw UnsupportedError(
           'iOS向けのFirebase設定が未登録です。Firebase Console '
           '（プロジェクト: petit-works-apps-9029a）で iOS アプリを追加し'
-          '（Bundle ID: com.petitworksapps.japanfuturemap）、'
+          '（Bundle ID: com.yourwish.japanfuturemap）、'
           'ダウンロードした GoogleService-Info.plist の値をもとに '
           'このファイルに `ios` という名前の FirebaseOptions を追加してください。',
         );
@@ -48,6 +48,6 @@ class DefaultFirebaseOptions {
   //   messagingSenderId: '216377882454',
   //   projectId: 'petit-works-apps-9029a',
   //   storageBucket: 'petit-works-apps-9029a.firebasestorage.app',
-  //   iosBundleId: 'com.petitworksapps.japanfuturemap',
+  //   iosBundleId: 'com.yourwish.japanfuturemap',
   // );
 }

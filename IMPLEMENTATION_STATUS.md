@@ -1,7 +1,29 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-13  
-**フェーズ**: iOSビルドCIのコスト最適化・gRPC-Coreパッチ修正
+**フェーズ**: iOS Bundle ID変更・Push通知Entitlements追加
+
+## 63. iOS Bundle ID変更・Push通知Entitlements追加（2026-07-13）
+- ユーザー指定によりiOS Bundle IDを`com.petitworks.nihonFutureMap`（実際にはRunnerTests側のみ
+  未統一だった旧値）→ **`com.yourwish.japanfuturemap`** に変更（`project.pbxproj`のRunner/
+  RunnerTests両ターゲット、`firebase_options.dart`のコメント・ひな形、USER_PROCEDURE.mdの
+  Firebase Console手順を更新）。Android版の`applicationId`（`com.petitworksapps.japanfuturemap`）
+  とは別のBundle IDとして運用する方針に変更
+- 「Capabilitiesは何にする？」という質問に対し、実際の使用機能から判定して回答:
+  - **必要**: Push Notifications（`firebase_messaging`使用）、Background Modes → Remote
+    notifications（Info.plistに設定済み）
+  - **不要**: Sign in with Apple／Google Sign-In（匿名認証のみ）、Associated Domains
+    （Universal Links不使用）、In-App Purchase明示設定（消耗型IAPはApp IDにデフォルトで
+    有効なため、Xcode Capability追加は必須ではない）
+- `ios/Runner/Runner.entitlements`を新規追加（`aps-environment: development`）し、
+  `project.pbxproj`のRunnerターゲット3構成（Debug/Profile/Release）に
+  `CODE_SIGN_ENTITLEMENTS`を配線。Push Notifications機能に必須の設定
+
+**確認事項**:
+- ✅ 全35テスト通過
+- ⏸ 実際のXcodeでの署名・Capabilities画面表示確認は未実施（Mac環境が必要）
+- ⏸ App Store Connect側のBundle ID登録（`com.yourwish.japanfuturemap`、Apple Developer
+  Programでの新規App ID作成）はユーザー側の作業として残っている
 
 ## 62. iOSビルドCIのコスト最適化・gRPC-Coreパッチ修正（2026-07-13）
 - GitHub Actionsで`build-ios`（macOSランナー）を試行錯誤していたところ、

@@ -11,10 +11,13 @@ Claude側では完結できない、お手元での作業手順をまとめて�
 
 1. **macOS環境の用意**（実機Mac、またはCodemagic/Bitrise等のクラウドMacビルドサービス）
 2. **Apple Developer Program登録**（年間$99）とApp Store Connectでのアプリ登録
+   （Bundle ID: `com.yourwish.japanfuturemap`で新規App IDを作成）
+   - Capabilitiesは「Push Notifications」を有効化（`firebase_messaging`のため必須）。
+     In-App Purchase（寄付機能）はApp IDにデフォルトで有効なため追加設定不要
 3. **Firebase Consoleに iOS アプリを追加**
    - https://console.firebase.google.com をfunvestment1@gmail.comで開く
    - プロジェクト「petit-works-apps-9029a」→「アプリを追加」→ iOS
-   - Bundle ID: `com.petitworksapps.japanfuturemap`
+   - Bundle ID: `com.yourwish.japanfuturemap`
    - ダウンロードした `GoogleService-Info.plist` を `ios/Runner/` に配置
    - 取得した値（apiKey・appId等）を `lib/firebase_options.dart` の `ios` ブロックに追記
      （ひな形コメントを用意済み）
