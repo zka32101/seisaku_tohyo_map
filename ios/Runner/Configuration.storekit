@@ -1,0 +1,65 @@
+{
+  "identifier" : "3B1A2C4D-5E6F-4A7B-8C9D-0E1F2A3B4C5D",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "120",
+      "familyShareable" : false,
+      "internalID" : "DONATION_SMALL_001",
+      "localizations" : [
+        {
+          "description" : "気軽に応援したい方に",
+          "displayName" : "コーヒー1杯分",
+          "locale" : "ja_JP"
+        }
+      ],
+      "productID" : "donation_small",
+      "referenceName" : "コーヒー1杯分",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "500",
+      "familyShareable" : false,
+      "internalID" : "DONATION_MEDIUM_001",
+      "localizations" : [
+        {
+          "description" : "もう少し応援したい方に",
+          "displayName" : "ランチ1食分",
+          "locale" : "ja_JP"
+        }
+      ],
+      "productID" : "donation_medium",
+      "referenceName" : "ランチ1食分",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "1000",
+      "familyShareable" : false,
+      "internalID" : "DONATION_LARGE_001",
+      "localizations" : [
+        {
+          "description" : "継続的な開発をしっかり支えたい方に",
+          "displayName" : "がっつり応援",
+          "locale" : "ja_JP"
+        }
+      ],
+      "productID" : "donation_large",
+      "referenceName" : "がっつり応援",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : "0",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "ja_JP",
+    "_storefront" : "JPN",
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

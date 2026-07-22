@@ -257,6 +257,40 @@ Google Play Consoleでのアプリ登録・商品登録が必須**です（未�
 ### 注意点
 - 商品IDはコード側（`lib/domain/entities/donation_tier.dart`）で固定されているため、
   Play Console側の商品IDと**完全に一致させる**必要があります
+
+---
+
+## 3.7. 寄付機能（App Store課金）の商品登録（iOS）
+
+Dart側のコードは`in_app_purchase`パッケージ（Android/iOS両対応のfederated plugin）を
+使っているため、iOS向けの追加コード実装は不要です。**App Store Connectでの商品登録のみ**が必要です。
+
+### 前提条件
+- Apple Developer Program登録・App Store Connectでのアプリ登録が済んでいること
+  （「0. iOS版のビルドについて」参照）
+
+### 手順
+1. App Store Connect → 対象アプリ → **機能** → **App内課金**
+2. 「+」で、以下の3つを **消耗型（Consumable）** として登録:
+
+   | 商品ID（正確に一致させる） | 参照名の例 | 価格の例 |
+   |---|---|---|
+   | `donation_small` | コーヒー1杯分 | ¥120 |
+   | `donation_medium` | ランチ1食分 | ¥500 |
+   | `donation_large` | がっつり応援 | ¥1,000 |
+
+3. 各商品にローカライズ（表示名・説明文、日本語）を設定し、「送信準備完了」にする
+4. 税務・銀行・連絡先情報（Agreements, Tax, and Banking）がApp Store Connect側で
+   完了していないと、App内課金がテスト・審査に進めない点に注意
+5. Xcodeでの動作確認には、`ios/Runner/Configuration.storekit`（用意済み）を使うと、
+   App Store Connectの登録前でもシミュレータでローンチ・購入フローをテストできます
+   （Xcode → Product → Scheme → Edit Scheme → Run → Options →
+   StoreKit Configuration で選択）
+6. 実際にApp Store Connect登録後は、Sandboxテスターアカウントで実機購入をテスト
+
+### 注意点
+- 商品IDはAndroid版（Google Play Console）と**完全に同じ文字列**で登録してください
+  （コード側は1つの商品IDリストをOS問わず共通で使っています）
 - 価格は自由に変更可能です（Play Console側で設定するだけでアプリ側の変更は不要）
 
 ---

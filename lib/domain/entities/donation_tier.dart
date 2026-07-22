@@ -1,5 +1,5 @@
 class DonationTier {
-  final String productId; // Google Play Console の商品IDと一致させる
+  final String productId; // Google Play Console / App Store Connect の商品IDと一致させる
   final String label;
   final String description;
   final String emoji;

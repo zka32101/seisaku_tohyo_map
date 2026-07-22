@@ -5,11 +5,13 @@ import 'package:logger/logger.dart';
 
 import '../../domain/entities/donation_tier.dart';
 
-/// Google Play課金（消費型アイテム）による寄付機能
+/// アプリ内課金（消費型アイテム）による寄付機能
 ///
-/// 商品ID（donation_small/medium/large）はGoogle Play Consoleで事前に
-/// 「アプリ内アイテム（消費型）」として登録しておく必要がある。未登録の間は
-/// `queryProductDetails`が空を返すため、寄付ボタンは「準備中」表示になる。
+/// `in_app_purchase`パッケージはAndroid（Google Play課金）・iOS（App Store/StoreKit）の
+/// 両方に対応するfederated pluginのため、このクラスのコードはプラットフォーム分岐なしで動く。
+/// 商品ID（donation_small/medium/large）は、Google Play Console／App Store Connectの
+/// 双方で事前に「消費型（Consumable）」アプリ内アイテムとして登録しておく必要がある。
+/// 未登録の間は`queryProductDetails`が空を返すため、寄付ボタンは「準備中」表示になる。
 class DonationService {
   static final DonationService _instance = DonationService._internal();
 

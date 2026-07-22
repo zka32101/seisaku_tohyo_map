@@ -1,7 +1,24 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-13  
-**フェーズ**: iOSビルドアーティファクトのアップロード追加（Potion Kitchen方式に統一）
+**フェーズ**: iOS寄付課金（App内課金）対応
+
+## 61. iOS寄付課金（App内課金）対応（2026-07-13）
+- 「IOSの寄付課金を追加したい」という要望を受け対応。`in_app_purchase`パッケージは
+  Android（Google Play課金）・iOS（App Store/StoreKit）の両対応federated pluginのため、
+  `DonationService`・`DonationScreen`のDartコードはプラットフォーム分岐なしで両OSに対応済み
+  （追加のコード実装は不要と判明）
+- コメントをGoogle Play専用の記述から両ストア対応の記述に更新
+  （`donation_service.dart`・`donation_tier.dart`）
+- `ios/Runner/Configuration.storekit`を新規追加。App Store Connectでの商品登録前でも、
+  Xcodeシミュレータでdonation_small/medium/largeの3商品（消耗型）の購入フローをテストできる
+- USER_PROCEDURE.mdに「3.7. 寄付機能（App Store課金）の商品登録（iOS）」を新設し、
+  Google Play Console向け手順（3.6）と対になる形でApp Store Connect側の手順を記載
+  （商品ID・価格例・StoreKit Configurationの使い方・Sandboxテスト手順）
+
+**確認事項**:
+- ✅ 全35テスト通過
+- ⏸ 実際のiOSでの購入動作確認は未実施（App Store Connect商品登録・Mac環境が必要）
 
 ## 60. iOSビルドアーティファクトのアップロード追加（2026-07-13）
 - 「PosionKichenでIOSビルドしているので同様に」という要望を受け、`potion_kitchen`アプリの
