@@ -1,7 +1,27 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-13  
-**フェーズ**: iOS版Firebase設定完了（GoogleService-Info.plist配置）
+**フェーズ**: アプリアイコンをカスタムデザインに変更
+
+## 66. アプリアイコンをカスタムデザインに変更（2026-07-13）
+- 「アイコン・スクリーンショットの準備」の一環として、Flutterデフォルトのままだった
+  アプリアイコンをカスタムデザインに変更
+- 画像生成AIツールは未接続（[[reference_game_asset_generator_limitation]]）だったため、
+  Python（Pillow）で直接1024×1024のアイコンをプログラム的に描画: アプリのブランドカラー
+  （`AppColors.primary` #2563EB）を背景に、白い上昇トレンドの矢印（折れ線グラフ＋矢印ヘッド）
+  というシンプルな幾何学的デザイン。小サイズ（20px等）でも視認できるよう、結合点の丸め・
+  余白を調整して2回リデザイン
+- `assets/icon/icon.png`をソースとして`flutter_launcher_icons`パッケージ（新規dev_dependency）
+  を導入し、Android全解像度（mipmap-*）・iOS全サイズ（AppIcon.appiconset、1024×1024含む）に
+  自動展開。iOS向けは`remove_alpha_ios: true`でApp Store要件（アルファチャンネル不可）に対応
+- Xcodeでのプロジェクト設定はflutter_launcher_icons側で軽微な調整のみ
+  （`ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS`）、直前に追加した
+  `CODE_SIGN_ENTITLEMENTS`・`GoogleService-Info.plist`の参照には影響なし
+
+**確認事項**:
+- ✅ 全35テスト通過
+- ✅ `flutter build apk --release` 成功（55.6MB、新アイコン反映済み）
+- ⏸ iOS実機・シミュレータでの見た目確認は未実施（Mac環境が必要）
 
 ## 65. iOS版Firebase設定完了（GoogleService-Info.plist配置）（2026-07-13）
 - ユーザーがFirebase ConsoleでiOSアプリを追加し取得した`GoogleService-Info.plist`を
