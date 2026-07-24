@@ -29,6 +29,11 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
+  # Firebase.h等、モジュールとして書かれていないヘッダーをObjective-C側から
+  # importしているPod（firebase_messagingが依存するFirebase umbrella header等）があり、
+  # use_frameworks! のみだと "Include of non-modular header inside framework module"
+  # というビルドエラーになる。use_modular_headers! を併用してこれを回避する。
+  use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
