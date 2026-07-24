@@ -1,7 +1,34 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-24  
-**フェーズ**: Swift Package Manager自動検出の無効化（CocoaPods構成維持）
+**フェーズ**: 🎉 iOS署名付きビルド・TestFlightアップロード パイプライン完全成功
+
+## 71. iOS署名付きビルド・TestFlightアップロード パイプライン完全成功（2026-07-24）
+- `zka32103-coder/nihon_future_map`（4つ目のリポジトリ、請求ブロックのなかったアカウント）で
+  `build-ios-signed`ジョブの再実行（失敗ジョブのみ再実行、`gh run rerun --failed`でコスト削減）が
+  **全ジョブPASS**で完了。iOSの証明書インポート→署名→アーカイブ→IPA生成→TestFlightアップロードの
+  一連のパイプラインが、GitHub Actions上で完全に自動化された状態で動作することを実証した
+  （run: https://github.com/zka32103-coder/nihon_future_map/actions/runs/30087506632）
+- これまでの一連の作業で解決した問題（すべて解消済み）:
+  1. p12証明書パスワードの末尾改行混入（`echo`ではなく`printf`で登録）
+  2. OpenSSL 3.xのデフォルト暗号化方式とmacOS `security`コマンドの非互換（`-legacy`フラグで再生成）
+  3. Xcodeプロジェクトの署名方式が`Automatic`のままだった問題（`CODE_SIGN_STYLE=Manual`・
+     `DEVELOPMENT_TEAM`・`PROVISIONING_PROFILE_SPECIFIER`を明示設定）
+  4. Firebaseプラグインの非モジュラーヘッダー問題（メジャーバージョンアップで解決、
+     Podfileレベルの回避策では直せなかった）
+  5. Firebaseアップグレードに伴うSwift Package Manager自動検出との衝突
+     （`pubspec.yaml`で明示的に無効化）
+  6. 直前のTestFlightアップロード失敗はApple側の一時的な500エラーで、再実行のみで解決
+- 途中、GitHub Actionsの請求ブロックに**3つのアカウント**（`funvestment1-svg`・
+  `petitworksappsdev-hash`・`zka32101`）が次々と到達し、最終的に4つ目のアカウント
+  （`zka32103-coder`）で検証を完了した
+
+**確認事項**:
+- ✅ 全35テスト通過
+- ✅ Android debug APKビルド成功
+- ✅ **iOS署名付きIPAビルド＋TestFlightアップロード成功**（このアプリで初のiOS実配布物）
+- 📝 次のステップ: App Store ConnectでTestFlightのビルド処理完了を待ち、内部テスターへの
+  配信・実機での動作確認に進む
 
 ## 70. Swift Package Manager自動検出の無効化（2026-07-24）
 - Firebaseパッケージのアップグレード（#69）により、以前の`Include of non-modular header`
