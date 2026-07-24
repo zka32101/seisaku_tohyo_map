@@ -1,7 +1,30 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-24  
-**フェーズ**: iOS署名付きビルド・TestFlightアップロードの自動化
+**フェーズ**: Firebaseパッケージのメジャーバージョンアップ（iOSビルド根本修正）
+
+## 69. Firebaseパッケージのメジャーバージョンアップ（2026-07-24）
+- `build-ios-signed`ジョブが`Include of non-modular header inside framework module
+  'firebase_messaging.FLTFirebaseMessagingPlugin'`で3回連続失敗（`use_modular_headers!`・
+  `CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES`の両Podfile修正を試すも解消せず）
+- サブエージェントで根本原因を調査した結果、**Podfileでは直せない、FlutterFireプラグイン
+  自体の既知の不具合**と判明。旧バージョンのFirebaseプラグインが古い`#import <Firebase/Firebase.h>`
+  （umbrella header）を使っており、Xcode 16の厳格なモジュラーヘッダーチェックに抵触していた。
+  メンテナーが2024年9月のリリース（[flutterfire#13400](https://github.com/firebase/flutterfire/pull/13400)）で
+  各プラグインのソースコード側を個別モジュラーimportに修正済み
+- ユーザー確認の上、Firebase関連パッケージをメジャーバージョンアップ:
+  - `firebase_core`: ^2.28.0 → ^3.6.0（解決: 3.15.2）
+  - `cloud_firestore`: ^4.15.0 → ^5.4.3（解決: 5.6.12）
+  - `firebase_auth`: ^4.19.0 → ^5.3.1（解決: 5.7.0）
+  - `firebase_analytics`: ^10.8.0 → ^11.3.3（解決: 11.6.0）
+  - `firebase_messaging`: ^14.7.0 → ^15.1.3（解決: 15.2.10）
+- Dartコード側のAPI利用は特に変更不要だった（既存の呼び出しパターンが新バージョンでも
+  引き続き有効）。全35テストPASS
+
+**確認事項**:
+- ✅ 全35テスト通過
+- ✅ `flutter build apk --release` 成功（55.9MB、Android側にFirebase SDKアップグレードの影響なし）
+- ⏳ `build-ios-signed`ジョブの再実行結果は次項に追記予定
 
 ## 68. iOS署名付きビルド・TestFlightアップロードの自動化（2026-07-24）
 - 「アップロードビルドはどうやる」という要望を受け、GitHub Actionsで署名付きIPAを
