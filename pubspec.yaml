@@ -93,6 +93,14 @@ flutter_launcher_icons:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # Firebase系プラグインが新しいバージョンでSwift Package Manager (SPM) 対応になったことで、
+  # FlutterがiOSビルド時にSPMへの移行を自動検出・混在させようとし、
+  # 既存のPodfileベースの構成（BoringSSL-GRPC/gRPC-Coreのソースパッチ等を含む）と衝突して
+  # "The sandbox is not in sync with the Podfile.lock" エラーになる問題があった。
+  # SPM自動検出を明示的に無効化し、CocoaPods構成のみを使うようにする。
+  config:
+    enable-swift-package-manager: false
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

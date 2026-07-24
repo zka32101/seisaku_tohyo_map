@@ -1,7 +1,25 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-24  
-**フェーズ**: Firebaseパッケージのメジャーバージョンアップ（iOSビルド根本修正）
+**フェーズ**: Swift Package Manager自動検出の無効化（CocoaPods構成維持）
+
+## 70. Swift Package Manager自動検出の無効化（2026-07-24）
+- Firebaseパッケージのアップグレード（#69）により、以前の`Include of non-modular header`
+  エラーは解消したが、新しいFirebaseプラグインがSwift Package Manager (SPM)対応になったため、
+  Flutter 3.44がiOSビルド時に「全プラグインがSwift Package」と自動検出し、既存のPodfileベース
+  構成と混在させようとして`Error (Xcode): The sandbox is not in sync with the Podfile.lock`
+  というエラーになった
+- サブエージェントで調査した結果、これはキャッシュの問題ではなく、Flutter 3.44から
+  SPMがデフォルトで有効になったことによる既知の挙動（[flutter/flutter#151504](https://github.com/flutter/flutter/issues/151504)、
+  [公式ドキュメント](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers)）
+  と判明。BoringSSL-GRPC・gRPC-Coreへのソースパッチなど、既存のPodfile構成をそのまま維持したい
+  ため、SPMへの移行ではなく無効化を選択
+- `pubspec.yaml`に`flutter.config.enable-swift-package-manager: false`を追加し、
+  CocoaPodsのみを使う構成に固定
+
+**確認事項**:
+- ✅ 全35テスト通過
+- ⏳ `build-ios-signed`ジョブの再実行結果は次項に追記予定
 
 ## 69. Firebaseパッケージのメジャーバージョンアップ（2026-07-24）
 - `build-ios-signed`ジョブが`Include of non-modular header inside framework module
