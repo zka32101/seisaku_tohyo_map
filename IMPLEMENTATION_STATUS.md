@@ -1,7 +1,36 @@
 # 日本の未来マップ — 実装ステータス
 
-**最終更新**: 2026-07-13  
-**フェーズ**: ストア掲載用テキスト・プライバシーポリシーの作成
+**最終更新**: 2026-07-24  
+**フェーズ**: iOS署名付きビルド・TestFlightアップロードの自動化
+
+## 68. iOS署名付きビルド・TestFlightアップロードの自動化（2026-07-24）
+- 「アップロードビルドはどうやる」という要望を受け、GitHub Actionsで署名付きIPAを
+  ビルドしTestFlightへ自動アップロードする`build-ios-signed`ジョブを追加
+- **GitHubアカウントの移行**: `funvestment1-svg`・`petitworksappsdev-hash`の両アカウントが
+  Actions請求ブロック中だったため、新たに`zka32101`アカウント（Personal Access Token認証）に
+  リポジトリを移行。`git remote`は`origin-funvestment1`・`origin-petitworksappsdev`として
+  旧リモートを保持。CI正常動作を確認済み（test/build-android PASS）
+- **証明書一式をopensslでWindows上で生成**（Mac不要）: CSR生成→Apple Developerで
+  Distribution証明書発行→`.p12`変換までを`ios-signing/`フォルダ（gitignore対象）で実施。
+  1回目のアップロードは証明書とCSRの不一致でエラーになり、同じCSRファイルで再発行して解決
+- **Provisioning Profile**（`JapanFutureMap App Store`）をApple Developerで作成、
+  Bundle ID `com.yourwish.japanfuturemap`・Team ID `6UWJGP52W5`と正しく紐付くことを確認
+- **App Store Connect API Key**: 当初、別アプリ（Potion Kitchen）で発行済みのキーを
+  再利用しようとしたが、GitHub Secretsの値は読み出し不可のため、artifactに書き出す形での
+  移行を試みるも両アカウントの請求ブロックで断念。最終的にユーザーが`H:\マイドライブ\key\`に
+  保存していた同キー（Key ID: 32U89S87F4、Team 6UWJGP52W5配下で共通利用可能）を発見・使用
+  （保存場所は[[reference_apple_appstore_connect_credentials]]としてメモリに記録）
+- `ios/ExportOptions.plist`を新規作成（method: app-store-connect、手動署名、
+  Bundle ID→Provisioning Profile名のマッピング）
+- 7つのGitHub Secretsを`zka32101/nihon_future_map`に登録（証明書・パスワード・
+  プロビジョニングプロファイル・API Key・Key ID・Issuer ID・Team ID、すべてBase64/平文で）
+- `build-ios-signed`ジョブは他の2ジョブと同様、`workflow_dispatch`（手動実行）でのみ起動する
+  よう最初からゲート（[[feedback_ios_cicd_cost_optimization]]の3段階ゲート方針に準拠）
+
+**確認事項**:
+- ✅ 全35テスト通過（YAML/plist追加のみ、Dartコードへの影響なし）
+- ⏸ `build-ios-signed`ジョブの実際の実行結果は未確認（次回workflow_dispatchで手動実行して確認要）
+- ⚠️ `ios-signing/`フォルダ（秘密鍵・証明書原本）は`.gitignore`に追加しコミット対象外に
 
 ## 67. ストア掲載用テキスト・プライバシーポリシーの作成（2026-07-13）
 - 「アプリ情報などの有力内容」という要望を受け、App Store Connect / Google Play Console に
