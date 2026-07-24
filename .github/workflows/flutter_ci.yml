@@ -116,6 +116,8 @@ jobs:
           security set-keychain-settings -t 3600 -u build.keychain
           security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          # codesignが証明書を見つけられるよう、検索リストにも明示的に追加する
+          security list-keychains -d user -s build.keychain login.keychain
           rm certificate.p12
 
       - name: Install provisioning profile
