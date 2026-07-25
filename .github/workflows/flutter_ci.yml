@@ -29,7 +29,33 @@ jobs:
         run: flutter analyze
 
       - name: Run tests
-        run: flutter test
+        run: flutter test --exclude-tags=screenshot
+
+  screenshots:
+    name: Generate App Store screenshots
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 実機・シミュレータなしで、6.5インチiPhone相当の物理解像度(1242x2688)で
+      # 主要画面をウィジェットツリーから直接レンダリングしてPNG出力する。
+      - name: Capture screenshots
+        run: flutter test --tags=screenshot test/screenshots/app_screenshots_test.dart
+
+      - name: Upload screenshots artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-store-screenshots
+          path: build/screenshots/*.png
 
   build-android:
     name: Build Android APK (debug)
