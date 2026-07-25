@@ -9,6 +9,10 @@ class Challenge {
   final String status; // candidate/analyzing/published
   final DateTime createdAt;
   final List<String> tags; // 検索・発見用タグ（例: 年金, 子育て, 地方）
+  // この課題に関連する国の予算区分の規模（兆円、参考値）。
+  // 課題そのものへの予算配分ではなく、関連する予算区分（社会保障関係費・防衛関係費など）の
+  // 規模を示す参考値。出典・時点が明確に確認できた課題のみ設定し、不明な課題はnullのまま。
+  final double? budgetTrillionYen;
 
   Challenge({
     required this.id,
@@ -21,6 +25,7 @@ class Challenge {
     required this.status,
     required this.createdAt,
     this.tags = const [],
+    this.budgetTrillionYen,
   });
 
   Challenge copyWith({
@@ -34,6 +39,7 @@ class Challenge {
     String? status,
     DateTime? createdAt,
     List<String>? tags,
+    double? budgetTrillionYen,
   }) {
     return Challenge(
       id: id ?? this.id,
@@ -46,6 +52,7 @@ class Challenge {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       tags: tags ?? this.tags,
+      budgetTrillionYen: budgetTrillionYen ?? this.budgetTrillionYen,
     );
   }
 

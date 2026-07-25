@@ -1,7 +1,56 @@
 # 日本の未来マップ — 実装ステータス
 
-**最終更新**: 2026-07-24  
-**フェーズ**: 🎉 iOS署名付きビルド・TestFlightアップロード パイプライン完全成功
+**最終更新**: 2026-07-25  
+**フェーズ**: 課題の注目度・予算マッピング機能を追加
+
+## 73. モックデータの初期投票数リセット（2026-07-25）
+- `firebase_service.dart`の`getMockChallenges()`内、全課題（51件）の`voteCount`・`agreeCount`を
+  ハードコードされていた初期値から`0`にリセット
+- `load_policy_options.dart`の全対策案（153件、`_o()`呼び出しの末尾引数）の`voteCount`も同様に`0`にリセット
+- ユーザー選択により、対象は**アプリ内モックデータの初期票数（コード側）のみ**。Firestore本番データや
+  端末ローカルの「投票済み」状態（`votedChallengeIdsProvider`等、現状アプリ再起動で消えるメモリ内state）は対象外
+- 副作用として、注目度マップ（`_AttentionMap`、[[project_nihon_future_map]]の72番で追加）が
+  `voteCount > 0`のみを対象にしていたため、リセット直後は空表示になる不具合を発見・修正。
+  全課題を対象にし、`voteCount == 0`の課題は賛同率0%（x=0）としてプロットするよう変更。
+  また`maxY`が0だと散布図が潰れる問題も`maxVotes == 0 ? 10 : maxVotes * 1.15`でガード
+- ✅ `dart format`・全35テストPASS
+
+## 72. 財務省の情報統制論争・注目度＆予算マップ・政党個人の主張機能を追加（2026-07-25）
+- **新規課題「財務省の情報発信力と『ザイム真理教』論争」**を追加（id: `finance_ministry_narrative_control`,
+  category: `structural`）。財務省が緊縮財政・増税路線を政治家・メディア・国民に浸透させているとの
+  批判（通称「ザイム真理教」、森永卓郎氏『ザイム真理教』2023年が起点）と、財政規律の必要性を訴える
+  反論（岸博幸氏の批判記事等）を両論併記。既存の`bureaucracy_influence`（官僚機構の影響力）とは
+  切り口を分け、情報発信・世論形成という角度に絞った。対策案3件・ChallengeDetail（macro/detail/outlook）も追加
+- **`Challenge`に`budgetTrillionYen`（予算規模・兆円、nullable）を追加**。出典・時点が確認できた
+  9課題のみ設定（国債費31.3兆円→`national_debt`、防衛関係費8.8兆円→`defense_budget_funding`、
+  地方交付税交付金等20.9兆円→`local_fiscal_dependency`、文教科学振興費6.0兆円→`education_gap`、
+  公共事業関係費6.1兆円→`disaster_recovery_cost`、特別会計歳出総額400兆円→`special_account_opacity`、
+  介護給付費3.7兆円→`caregiver_shortage`、少子化対策費3.5兆円→`childcare_waitlist`、一般会計総額
+  122.3兆円→新規課題。すべて財務省・厚労省の予算資料をWebSearchで確認した令和7-8年度の実数）
+- **政党・個人の主張を課題に関連付ける新機能**: `IssueAdvocate`エンティティ＋`LoadIssueAdvocates`
+  ユースケースを新設。一次資料（政党公式サイト・政府資料・報道）で裏取りできた6課題・16件のみ掲載
+  （`money_in_politics`＝企業団体献金への自民・立憲・共産の立場、`hereditary_politicians`＝世襲制限
+  への維新・立憲・自民の立場、`women_in_politics`＝クオータ制への立憲・共産・政府目標、
+  `defense_budget_funding`＝財源方針への政府与党・国民民主の立場、`income_stagnation`＝
+  「年収の壁」への国民民主の立場、新規課題`finance_ministry_narrative_control`＝森永卓郎氏・岸博幸氏の
+  両論）。`ChallengeDetailScreen`に「政党・個人が挙げている主張」セクションを`_DietBillSection`と
+  同様のパターンで追加（該当課題がある場合のみジャンプバーに表示）
+- **「週刊 ランキング」画面にマップタブを追加**（2タブ→3タブ）。`_ChallengeMapTab`で
+  `SegmentedButton`により2種類のfl_chart `ScatterChart`を切替表示:
+  - 注目度マップ: 横軸＝賛同率（agreeCount/voteCount）、縦軸＝投票数。右上ほど「多くの人が注目し
+    強く賛同している」課題、左下は「まだ知られていないが知られれば支持されるかもしれない」課題
+  - 予算マップ: 円の大きさ＝関連する国の予算区分の規模（兆円）、縦軸＝投票数。budgetTrillionYenが
+    設定された9課題のみ対象。個別課題への予算配分ではなく参考値である旨をUI上に明記
+  - いずれもプロットタップで該当`ChallengeDetailScreen`に遷移
+
+**確認事項**:
+- ✅ `dart format`実行（4ファイル整形）
+- ✅ 全35テスト通過（`flutter test`）
+- ⚠️ ローカル`flutter analyze`は既知の日本語パスLSPクラッシュ（[[reference_flutter_ios_github_actions_ci]]参照）で
+  実行不可のため未検証。CI（Linux）側の`analyze-and-test`ジョブでの確認が必要
+- 🔧 Android release APKビルドは`build-flutter-apk`スキルで実行中
+- 📝 政党・個人の主張データは6課題・16件のみ（全51課題中）。政治的機微さを考慮し、
+  一次資料で裏取りできたものに限定。範囲拡大は今後の課題
 
 ## 71. iOS署名付きビルド・TestFlightアップロード パイプライン完全成功（2026-07-24）
 - `zka32103-coder/nihon_future_map`（4つ目のリポジトリ、請求ブロックのなかったアカウント）で

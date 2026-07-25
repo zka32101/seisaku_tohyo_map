@@ -9,13 +9,16 @@ import '../../application/providers/connectivity_provider.dart';
 import '../../application/providers/diet_bill_provider.dart';
 import '../../application/providers/firebase_provider.dart';
 import '../../application/providers/international_comparison_provider.dart';
+import '../../application/providers/issue_advocate_provider.dart';
 import '../../application/usecases/check_new_achievements.dart';
 import '../../application/usecases/load_diet_bills.dart';
+import '../../application/usecases/load_issue_advocates.dart';
 import '../../application/usecases/validate_comment.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/challenge_data.dart';
 import '../../domain/entities/comment.dart';
 import '../../domain/entities/diet_bill.dart';
+import '../../domain/entities/issue_advocate.dart';
 import '../../domain/entities/policy_option.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
@@ -43,6 +46,7 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
   final _outlookKey = GlobalKey();
   final _agreementKey = GlobalKey();
   final _dietBillKey = GlobalKey();
+  final _advocateKey = GlobalKey();
   final _intlKey = GlobalKey();
   final _policyKey = GlobalKey();
   final _commentsKey = GlobalKey();
@@ -96,6 +100,9 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
       internationalComparisonProvider(challenge.id),
     );
     final hasDietBills = LoadDietBills.forChallenge(challenge.id).isNotEmpty;
+    final hasAdvocates = LoadIssueAdvocates.forChallenge(
+      challenge.id,
+    ).isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -119,6 +126,7 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
             onOutlookTap: () => _jumpTo(_outlookKey),
             onAgreementTap: () => _jumpTo(_agreementKey),
             onDietBillTap: hasDietBills ? () => _jumpTo(_dietBillKey) : null,
+            onAdvocateTap: hasAdvocates ? () => _jumpTo(_advocateKey) : null,
             onIntlTap: intlComparison != null ? () => _jumpTo(_intlKey) : null,
             onPolicyTap: () => _jumpTo(_policyKey),
             onCommentsTap: () => _jumpTo(_commentsKey),
@@ -291,6 +299,14 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
               KeyedSubtree(
                 key: _dietBillKey,
                 child: _DietBillSection(
+                  challengeId: challenge.id,
+                  color: color,
+                ),
+              ),
+
+              KeyedSubtree(
+                key: _advocateKey,
+                child: _IssueAdvocateSection(
                   challengeId: challenge.id,
                   color: color,
                 ),
@@ -589,6 +605,150 @@ class _DietBillCard extends StatelessWidget {
               TextButton.icon(
                 onPressed: () => launchUrl(
                   Uri.parse(bill.sourceUrl),
+                  mode: LaunchMode.externalApplication,
+                ),
+                icon: const Icon(Icons.open_in_new, size: 14),
+                label: const Text('詳細を見る'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  textStyle: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IssueAdvocateSection extends ConsumerWidget {
+  final String challengeId;
+  final Color color;
+
+  const _IssueAdvocateSection({required this.challengeId, required this.color});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final advocatesAsync = ref.watch(issueAdvocatesProvider(challengeId));
+
+    return advocatesAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
+      data: (advocates) {
+        if (advocates.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                Icon(Icons.campaign_outlined, size: 16, color: color),
+                const SizedBox(width: 6),
+                const Text(
+                  '政党・個人が挙げている主張',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            const Text(
+              '一次資料で裏取りできた立場のみを掲載しています',
+              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ...advocates.map(
+              (advocate) => _AdvocateCard(advocate: advocate, color: color),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _AdvocateCard extends StatelessWidget {
+  final IssueAdvocate advocate;
+  final Color color;
+
+  const _AdvocateCard({required this.advocate, required this.color});
+
+  static const _typeLabels = {
+    'party': '政党',
+    'government': '政府・与党',
+    'individual': '個人',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: Text(
+                  _typeLabels[advocate.type] ?? advocate.type,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  advocate.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          GlossaryText(
+            advocate.stance,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${advocate.sourceLabel}（${advocate.asOfDate}）',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => launchUrl(
+                  Uri.parse(advocate.sourceUrl),
                   mode: LaunchMode.externalApplication,
                 ),
                 icon: const Icon(Icons.open_in_new, size: 14),
@@ -1424,6 +1584,7 @@ class _SectionJumpBar extends StatelessWidget {
   final VoidCallback onOutlookTap;
   final VoidCallback onAgreementTap;
   final VoidCallback? onDietBillTap;
+  final VoidCallback? onAdvocateTap;
   final VoidCallback? onIntlTap;
   final VoidCallback onPolicyTap;
   final VoidCallback onCommentsTap;
@@ -1434,6 +1595,7 @@ class _SectionJumpBar extends StatelessWidget {
     required this.onOutlookTap,
     required this.onAgreementTap,
     required this.onDietBillTap,
+    required this.onAdvocateTap,
     required this.onIntlTap,
     required this.onPolicyTap,
     required this.onCommentsTap,
@@ -1447,6 +1609,8 @@ class _SectionJumpBar extends StatelessWidget {
       _JumpItem('賛同度', Icons.groups_outlined, onAgreementTap),
       if (onDietBillTap != null)
         _JumpItem('国会', Icons.account_balance, onDietBillTap!),
+      if (onAdvocateTap != null)
+        _JumpItem('政党・個人', Icons.campaign_outlined, onAdvocateTap!),
       if (onIntlTap != null) _JumpItem('世界', Icons.public, onIntlTap!),
       _JumpItem('対策案', Icons.how_to_vote_outlined, onPolicyTap),
       _JumpItem('声', Icons.forum_outlined, onCommentsTap),
