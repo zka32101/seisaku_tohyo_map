@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers/firebase_provider.dart';
 import '../../application/providers/good_news_provider.dart';
+import '../../application/usecases/load_agency_contacts.dart';
 import '../../application/usecases/load_diet_bills.dart';
 import '../../application/usecases/load_international_comparisons.dart';
 import '../../domain/entities/challenge.dart';
@@ -423,6 +424,9 @@ class _ChallengeTile extends StatelessWidget {
     final color = AppColors.categoryColor(challenge.category);
     final hasDietBill = LoadDietBills.forChallenge(challenge.id).isNotEmpty;
     final hasIntl = LoadInternationalComparisons.forId(challenge.id) != null;
+    final hasAgencyContact = LoadAgencyContacts.forChallenge(
+      challenge.id,
+    ).isNotEmpty;
 
     return Material(
       color: color.withValues(alpha: 0.06),
@@ -451,7 +455,7 @@ class _ChallengeTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (hasDietBill || hasIntl)
+              if (hasDietBill || hasIntl || hasAgencyContact)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -471,6 +475,15 @@ class _ChallengeTile extends StatelessWidget {
                           Icons.public,
                           size: 12,
                           color: AppColors.textMuted,
+                        ),
+                      ),
+                    if (hasAgencyContact)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 3),
+                        child: Icon(
+                          Icons.mark_email_read_outlined,
+                          size: 12,
+                          color: AppColors.success,
                         ),
                       ),
                   ],

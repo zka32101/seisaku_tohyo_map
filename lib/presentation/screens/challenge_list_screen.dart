@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers/firebase_provider.dart';
 import '../../application/usecases/check_new_achievements.dart';
+import '../../application/usecases/load_agency_contacts.dart';
 import '../../domain/entities/challenge.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
@@ -556,6 +557,19 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
                       Icons.auto_awesome,
                       size: 13,
                       color: AppColors.primary,
+                    ),
+                  ],
+                  if (LoadAgencyContacts.forChallenge(
+                    widget.challenge.id,
+                  ).isNotEmpty) ...[
+                    const SizedBox(width: 6),
+                    const Tooltip(
+                      message: '運営者が関係省庁・窓口に問い合わせ済み',
+                      child: Icon(
+                        Icons.mark_email_read_outlined,
+                        size: 13,
+                        color: AppColors.success,
+                      ),
                     ),
                   ],
                   const Spacer(),

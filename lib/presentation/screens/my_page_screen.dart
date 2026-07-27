@@ -7,6 +7,7 @@ import '../../domain/entities/achievement.dart';
 import '../../domain/entities/activity_stats.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
 import '../theme/app_theme.dart';
+import 'about_screen.dart';
 import 'challenge_detail_screen.dart';
 
 class MyPageScreen extends ConsumerWidget {
@@ -113,6 +114,45 @@ class MyPageScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           _MySubmittedProposals(),
+          const SizedBox(height: AppSpacing.lg),
+          Material(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.badge),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text('このアプリについて', style: TextStyle(fontSize: 13)),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: AppColors.textMuted,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../application/providers/agency_contact_provider.dart';
 import '../../application/providers/challenge_detail_provider.dart';
 import '../../application/providers/connectivity_provider.dart';
 import '../../application/providers/diet_bill_provider.dart';
@@ -11,9 +12,11 @@ import '../../application/providers/firebase_provider.dart';
 import '../../application/providers/international_comparison_provider.dart';
 import '../../application/providers/issue_advocate_provider.dart';
 import '../../application/usecases/check_new_achievements.dart';
+import '../../application/usecases/load_agency_contacts.dart';
 import '../../application/usecases/load_diet_bills.dart';
 import '../../application/usecases/load_issue_advocates.dart';
 import '../../application/usecases/validate_comment.dart';
+import '../../domain/entities/agency_contact.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/challenge_data.dart';
 import '../../domain/entities/comment.dart';
@@ -47,6 +50,7 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
   final _agreementKey = GlobalKey();
   final _dietBillKey = GlobalKey();
   final _advocateKey = GlobalKey();
+  final _agencyContactKey = GlobalKey();
   final _intlKey = GlobalKey();
   final _policyKey = GlobalKey();
   final _commentsKey = GlobalKey();
@@ -103,6 +107,9 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
     final hasAdvocates = LoadIssueAdvocates.forChallenge(
       challenge.id,
     ).isNotEmpty;
+    final hasAgencyContacts = LoadAgencyContacts.forChallenge(
+      challenge.id,
+    ).isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -127,6 +134,9 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
             onAgreementTap: () => _jumpTo(_agreementKey),
             onDietBillTap: hasDietBills ? () => _jumpTo(_dietBillKey) : null,
             onAdvocateTap: hasAdvocates ? () => _jumpTo(_advocateKey) : null,
+            onAgencyContactTap: hasAgencyContacts
+                ? () => _jumpTo(_agencyContactKey)
+                : null,
             onIntlTap: intlComparison != null ? () => _jumpTo(_intlKey) : null,
             onPolicyTap: () => _jumpTo(_policyKey),
             onCommentsTap: () => _jumpTo(_commentsKey),
@@ -307,6 +317,14 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
               KeyedSubtree(
                 key: _advocateKey,
                 child: _IssueAdvocateSection(
+                  challengeId: challenge.id,
+                  color: color,
+                ),
+              ),
+
+              KeyedSubtree(
+                key: _agencyContactKey,
+                child: _AgencyContactSection(
                   challengeId: challenge.id,
                   color: color,
                 ),
@@ -761,6 +779,156 @@ class _AdvocateCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AgencyContactSection extends ConsumerWidget {
+  final String challengeId;
+  final Color color;
+
+  const _AgencyContactSection({required this.challengeId, required this.color});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final contactsAsync = ref.watch(agencyContactsProvider(challengeId));
+
+    return contactsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
+      data: (contacts) {
+        if (contacts.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                Icon(Icons.mark_email_read_outlined, size: 16, color: color),
+                const SizedBox(width: 6),
+                const Text(
+                  '運営者から関係省庁・窓口への問い合わせ',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            const Text(
+              '実際に問い合わせを行った記録のみ掲載しています',
+              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ...contacts.map(
+              (contact) => _AgencyContactCard(contact: contact, color: color),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _AgencyContactCard extends StatelessWidget {
+  final AgencyContact contact;
+  final Color color;
+
+  const _AgencyContactCard({required this.contact, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            contact.agencyName,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: Text(
+                  contact.status,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                contact.method,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          GlossaryText(
+            contact.summary,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.6,
+            ),
+          ),
+          if (contact.responseSummary != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(AppRadius.badge),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.reply,
+                    size: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: GlossaryText(
+                      contact.responseSummary!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            contact.contactDate,
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
         ],
       ),
@@ -1585,6 +1753,7 @@ class _SectionJumpBar extends StatelessWidget {
   final VoidCallback onAgreementTap;
   final VoidCallback? onDietBillTap;
   final VoidCallback? onAdvocateTap;
+  final VoidCallback? onAgencyContactTap;
   final VoidCallback? onIntlTap;
   final VoidCallback onPolicyTap;
   final VoidCallback onCommentsTap;
@@ -1596,6 +1765,7 @@ class _SectionJumpBar extends StatelessWidget {
     required this.onAgreementTap,
     required this.onDietBillTap,
     required this.onAdvocateTap,
+    required this.onAgencyContactTap,
     required this.onIntlTap,
     required this.onPolicyTap,
     required this.onCommentsTap,
@@ -1611,6 +1781,8 @@ class _SectionJumpBar extends StatelessWidget {
         _JumpItem('国会', Icons.account_balance, onDietBillTap!),
       if (onAdvocateTap != null)
         _JumpItem('政党・個人', Icons.campaign_outlined, onAdvocateTap!),
+      if (onAgencyContactTap != null)
+        _JumpItem('問い合わせ', Icons.mark_email_read_outlined, onAgencyContactTap!),
       if (onIntlTap != null) _JumpItem('世界', Icons.public, onIntlTap!),
       _JumpItem('対策案', Icons.how_to_vote_outlined, onPolicyTap),
       _JumpItem('声', Icons.forum_outlined, onCommentsTap),
