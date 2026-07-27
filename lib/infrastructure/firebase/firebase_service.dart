@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 
 import '../../domain/entities/challenge.dart';
@@ -15,7 +16,14 @@ class FirebaseService {
 
   FirebaseService._internal() {
     _auth = FirebaseAuth.instance;
-    _firestore = FirebaseFirestore.instance;
+    // Firebaseプロジェクト（apps2-752cb）は他アプリと共用のため、Firestoreは
+    // "(default)"ではなく本アプリ専用の名前付きデータベース"japanfuturemap"を使う。
+    // 未指定だと(default)につながり、japanfuturemap側にだけ公開したルールが
+    // 効かずPERMISSION_DENIEDになるので注意（2026-07-27に発覚）。
+    _firestore = FirebaseFirestore.instanceFor(
+      app: Firebase.app(),
+      databaseId: 'japanfuturemap',
+    );
     // オフライン時も直近のデータを表示・投票やコメントの下書き送信ができるよう、
     // ローカルキャッシュと書き込みキューを明示的に有効化する（モバイルではデフォルトでも有効だが明示）
     _firestore.settings = const Settings(

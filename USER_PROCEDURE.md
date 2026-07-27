@@ -215,15 +215,20 @@ service cloud.firestore {
       // PERMISSION_DENIEDになってしまうため、policyOptions/userProposalsと同じ
       // 「特定フィールドのみの増分更新を許可する」パターンに変更（2026-07-27）。
       allow write: if request.auth != null
-        && request.resource.data.diff(resource.data == null ? {} : resource.data)
+        && request.resource.data.diff(resource == null ? {} : resource.data)
             .affectedKeys().hasOnly(['voteCount', 'agreeCount']);
 
+      // votes/agrees/likes/policyVotes は「自分の投票かどうか」をアプリ側が
+      // voteRef.get() で事前チェックしてから書き込む実装になっているため、
+      // allow read: if false だと自分の投票すら読めずPERMISSION_DENIEDになり
+      // 投票自体が失敗する（2026-07-27に発覚）。「本人のみ読める」に変更することで
+      // 他人の投票内容は見えないプライバシーは維持したまま、自己チェックを通す。
       match /votes/{userId} {
-        allow read: if false;
+        allow read: if request.auth != null && request.auth.uid == userId;
         allow write: if request.auth != null && request.auth.uid == userId;
       }
       match /agrees/{userId} {
-        allow read: if false;
+        allow read: if request.auth != null && request.auth.uid == userId;
         allow write: if request.auth != null && request.auth.uid == userId;
       }
       match /comments/{commentId} {
@@ -236,7 +241,7 @@ service cloud.firestore {
         allow delete: if false;
 
         match /likes/{userId} {
-          allow read: if false;
+          allow read: if request.auth != null && request.auth.uid == userId;
           allow write: if request.auth != null && request.auth.uid == userId;
         }
       }
@@ -244,11 +249,11 @@ service cloud.firestore {
       match /policyOptions/{optionId} {
         allow read: if true;
         allow write: if request.auth != null
-          && request.resource.data.diff(resource.data == null ? {} : resource.data)
+          && request.resource.data.diff(resource == null ? {} : resource.data)
               .affectedKeys().hasOnly(['voteCount']);
       }
       match /policyVotes/{userId} {
-        allow read: if false;
+        allow read: if request.auth != null && request.auth.uid == userId;
         allow create: if request.auth != null && request.auth.uid == userId;
         allow update, delete: if false;
       }
@@ -268,7 +273,7 @@ service cloud.firestore {
       allow delete: if false;
 
       match /votes/{userId} {
-        allow read: if false;
+        allow read: if request.auth != null && request.auth.uid == userId;
         allow write: if request.auth != null && request.auth.uid == userId;
       }
     }
@@ -306,7 +311,7 @@ Google Play Consoleでのアプリ登録・商品登録が必須**です（未�
 アプリはクラッシュせず安全に動作します）。
 
 ### 前提条件
-- Google Play Consoleにアプリ（`com.petitworksapps.japanfuturemap`）が登録済みであること
+- Google Play Consoleにアプリ（`com.yourwish.japanfuturemap`）が登録済みであること
   （未登録の場合は「5. Google Play ストア公開準備」を先に進めてください）
 
 ### 手順
@@ -370,7 +375,7 @@ Dart側のコードは`in_app_purchase`パッケージ（Android/iOS両対応の
 設計書にある ¥120/月 のペイウォールを実装する場合:
 
 1. https://app.revenuecat.com でアカウント作成（未作成の場合）
-2. プロジェクト作成 → Android アプリ追加（パッケージ名: `com.petitworksapps.japanfuturemap`）
+2. プロジェクト作成 → Android アプリ追加（パッケージ名: `com.yourwish.japanfuturemap`）
 3. Google Play Console で商品（サブスクリプション）を先に作成する必要があります（Play Console未登録ならこちらが先）
 4. API キーを取得し、私に共有いただければ `purchases_flutter` の実装を進めます
 

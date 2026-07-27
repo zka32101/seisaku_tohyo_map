@@ -1,4 +1,4 @@
-package com.petitworksapps.japanfuturemap
+package com.yourwish.japanfuturemap
 
 import io.flutter.embedding.android.FlutterActivity
 
