@@ -1,7 +1,33 @@
 # 日本の未来マップ — 実装ステータス
 
 **最終更新**: 2026-07-27  
-**フェーズ**: 投票不具合修正・アプリ概要画面・省庁問い合わせ記録機能を追加、iOSビルド4を配信
+**フェーズ**: Android版のFirebaseプロジェクト統一・投票不具合の根本修正（ビルド5）
+
+## 75. Android版のFirebaseプロジェクト統一とFirestore投票不具合の根本修正（2026-07-27）
+実機（Android）で「投票できない」を報告いただき、4段階の根本原因が見つかった。
+- **原因1: Android版が別のFirebaseプロジェクトに接続していた**: iOS版は`apps2-752cb`を使っているのに
+  Android版は`petit-works-apps-9029a`（未設定・ルール未公開）に接続していた。ユーザーの判断で
+  `apps2-752cb`に統一することとし、パッケージ名を`com.petitworksapps.japanfuturemap`→
+  `com.yourwish.japanfuturemap`に変更（`build.gradle.kts`のnamespace/applicationId、
+  `MainActivity.kt`のパッケージパス移動、新しい`google-services.json`への差し替え、
+  `firebase_options.dart`のandroidブロック更新）
+- **原因2: 名前付きFirestoreデータベースの不一致**: `apps2-752cb`は他アプリ（将棋アプリ等）と共用の
+  プロジェクトで、Firestoreは各アプリ専用の名前付きデータベース（`japanfuturemap`等）に分かれている。
+  `FirebaseFirestore.instance`は未指定だと`(default)`データベースに繋がってしまい、
+  `japanfuturemap`側にだけ公開したセキュリティルールが一切効かずPERMISSION_DENIEDになっていた。
+  `FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: 'japanfuturemap')`を明示指定して修正
+- **原因3: セキュリティルールが「自分の投票」の読み取りまで拒否していた**: `votes`/`agrees`/`likes`/
+  `policyVotes`の各サブコレクションが`allow read: if false`（誰にも読ませない）になっていたが、
+  アプリ側は投票前に`voteRef.get()`で「既に投票済みか」を自己チェックする実装のため、この自己チェック
+  自体がPERMISSION_DENIEDで失敗していた。`allow read: if request.auth.uid == userId`（本人のみ）に
+  変更し、他人の投票が見えないプライバシーは維持したまま自己チェックを通るよう修正
+- **原因4: セキュリティルールの`resource.data == null`判定がFirestore rules上で無効**: `challenges`/
+  `policyOptions`の書き込みルールで、未作成ドキュメントへの初回書き込みを許可する意図で
+  `resource.data == null ? {} : resource.data`と書いていたが、ドキュメントが存在しないとき
+  `resource`自体が`null`になるため`resource.data`へのアクセス時点でルール評価がエラーとなり、
+  常に拒否されていた。`resource == null ? {} : resource.data`に修正
+- 上記4点をすべて修正のうえ実機で対策案投票の成功を確認。`USER_PROCEDURE.md`のルール例も同様に更新
+- TestFlightビルド番号を`4`→`5`に更新（この修正をiOS版にも反映するため）
 
 ## 74. 投票/賛同の不具合修正・iPad対応復元・アプリについて画面・省庁問い合わせ記録機能（2026-07-27）
 - **投票・賛同が常に失敗するバグを修正**: `FirebaseService.voteChallenge()`/`agreeChallenge()`が
