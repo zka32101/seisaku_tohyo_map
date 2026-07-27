@@ -73,9 +73,11 @@ class FirebaseService {
           .set({'userId': userId, 'timestamp': FieldValue.serverTimestamp()});
 
       // 投票数を増加
-      await _firestore.collection('challenges').doc(challengeId).update({
+      // 課題ドキュメント自体はFirestoreに事前作成されていない（一覧はモックデータ表示のため）ので、
+      // update()だと対象ドキュメント不在でNOT_FOUNDになる。set()+mergeで無ければ作成する。
+      await _firestore.collection('challenges').doc(challengeId).set({
         'voteCount': FieldValue.increment(1),
-      });
+      }, SetOptions(merge: true));
 
       _logger.i('Vote recorded for challenge: $challengeId');
       return true;
@@ -95,10 +97,10 @@ class FirebaseService {
           .doc(userId)
           .set({'userId': userId, 'timestamp': FieldValue.serverTimestamp()});
 
-      // 賛同数を増加
-      await _firestore.collection('challenges').doc(challengeId).update({
+      // 賛同数を増加（理由はvoteChallengeのコメント参照: update()だとNOT_FOUNDになるためset()+mergeにしている）
+      await _firestore.collection('challenges').doc(challengeId).set({
         'agreeCount': FieldValue.increment(1),
-      });
+      }, SetOptions(merge: true));
 
       _logger.i('Agree recorded for challenge: $challengeId');
       return true;
