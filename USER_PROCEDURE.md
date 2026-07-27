@@ -209,7 +209,14 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /challenges/{challengeId} {
       allow read: if true;
-      allow write: if false; // voteCount等はCloud Functions経由に変更推奨
+      // voteCount/agreeCountの増分更新のみ、認証済みユーザーに許可する。
+      // 当初は「Cloud Functions経由に変更推奨」としてクライアントからの書き込みを
+      // 全面禁止していたが、Cloud Functionsが未実装のままだと投票・賛同が常に
+      // PERMISSION_DENIEDになってしまうため、policyOptions/userProposalsと同じ
+      // 「特定フィールドのみの増分更新を許可する」パターンに変更（2026-07-27）。
+      allow write: if request.auth != null
+        && request.resource.data.diff(resource.data == null ? {} : resource.data)
+            .affectedKeys().hasOnly(['voteCount', 'agreeCount']);
 
       match /votes/{userId} {
         allow read: if false;
