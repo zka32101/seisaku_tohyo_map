@@ -66,7 +66,7 @@ class MyPageScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           const Text(
-            'あなたが投票した課題',
+            'あなたが賛同した課題',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -84,7 +84,7 @@ class MyPageScreen extends ConsumerWidget {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                   child: Text(
-                    'まだ投票した課題がありません',
+                    'まだ賛同した課題がありません',
                     style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                   ),
                 );
@@ -167,7 +167,7 @@ class _StatsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      ('投票した課題', stats.votedChallengeCount, Icons.how_to_vote),
+      ('賛同した課題', stats.votedChallengeCount, Icons.how_to_vote),
       ('選んだ対策案', stats.policyVoteCount, Icons.checklist),
       ('投稿したコメント', stats.commentsPostedCount, Icons.forum),
       ('完了したクイズ', stats.quizzesCompletedCount, Icons.quiz),

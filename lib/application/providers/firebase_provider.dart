@@ -25,27 +25,14 @@ final challengesProvider = FutureProvider<List<Challenge>>((ref) async {
   return FirebaseService.getMockChallenges();
 });
 
-// このセッションで投票した課題ID（おすすめ機能に利用）
-final votedChallengeIdsProvider = StateProvider<Set<String>>((ref) => {});
+// このセッションで「これは問題」に賛同した課題ID（おすすめ機能に利用）
+final agreedChallengeIdsProvider = StateProvider<Set<String>>((ref) => {});
 
 // 一覧画面で選択中のカテゴリフィルター（nullは「すべて」）
 final selectedCategoryFilterProvider = StateProvider<String?>((ref) => null);
 
 // 一覧画面の検索キーワード
 final searchQueryProvider = StateProvider<String>((ref) => '');
-
-// 課題に投票
-final voteChallengeProvider = FutureProvider.family<bool, String>((
-  ref,
-  challengeId,
-) async {
-  final service = ref.watch(firebaseServiceProvider);
-  final userId = await ref.read(userIdProvider.future);
-
-  if (userId == null) return false;
-
-  return await service.voteChallenge(userId, challengeId);
-});
 
 // 課題に賛同
 final agreeChallengeProvider = FutureProvider.family<bool, String>((

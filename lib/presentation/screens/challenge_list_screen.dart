@@ -35,7 +35,7 @@ class ChallengeListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final challengesAsync = ref.watch(challengesProvider);
     final selectedCategory = ref.watch(selectedCategoryFilterProvider);
-    final votedIds = ref.watch(votedChallengeIdsProvider);
+    final votedIds = ref.watch(agreedChallengeIdsProvider);
     final searchQuery = ref.watch(searchQueryProvider);
 
     return Scaffold(
@@ -439,7 +439,6 @@ class _ChallengeCard extends ConsumerStatefulWidget {
 class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
   late int _voteCount;
   late int _agreeCount;
-  bool _voted = false;
   bool _agreed = false;
 
   @override
@@ -447,29 +446,6 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
     super.initState();
     _voteCount = widget.challenge.voteCount;
     _agreeCount = widget.challenge.agreeCount;
-  }
-
-  Future<void> _onVote() async {
-    if (_voted) return;
-    final result = await ref.read(
-      voteChallengeProvider(widget.challenge.id).future,
-    );
-    if (result && mounted) {
-      setState(() {
-        _voteCount++;
-        _voted = true;
-      });
-      ref
-          .read(votedChallengeIdsProvider.notifier)
-          .update((ids) => {...ids, widget.challenge.id});
-      AnalyticsService().logVoteSubmitted(challengeId: widget.challenge.id);
-      final newlyUnlocked = await CheckNewAchievements.call(
-        () => ActivityStore().addVotedChallenge(widget.challenge.id),
-      );
-      if (newlyUnlocked.isNotEmpty && mounted) {
-        showAchievementUnlockDialogs(context, newlyUnlocked);
-      }
-    }
   }
 
   Future<void> _onAgree() async {
@@ -482,7 +458,16 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
         _agreeCount++;
         _agreed = true;
       });
+      ref
+          .read(agreedChallengeIdsProvider.notifier)
+          .update((ids) => {...ids, widget.challenge.id});
       AnalyticsService().logAgreeSubmitted(challengeId: widget.challenge.id);
+      final newlyUnlocked = await CheckNewAchievements.call(
+        () => ActivityStore().addVotedChallenge(widget.challenge.id),
+      );
+      if (newlyUnlocked.isNotEmpty && mounted) {
+        showAchievementUnlockDialogs(context, newlyUnlocked);
+      }
     }
   }
 
@@ -613,38 +598,24 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
                 ),
               ],
               const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _voted ? null : _onVote,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: color,
-                        disabledBackgroundColor: AppColors.background,
-                        disabledForegroundColor: AppColors.textMuted,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: Text(_voted ? '投票済み ✓' : '投票する'),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: _agreed ? null : _onAgree,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(
+                      color: _agreed ? AppColors.border : color,
                     ),
+                    foregroundColor: _agreed ? AppColors.textMuted : color,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _agreed ? null : _onAgree,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        foregroundColor: _agreed
-                            ? AppColors.textMuted
-                            : AppColors.textPrimary,
-                      ),
-                      child: Text(
-                        _agreed
-                            ? '賛同済み ✓ ($_agreeCount)'
-                            : 'これは問題 ($_agreeCount)',
-                      ),
-                    ),
+                  child: Text(
+                    _agreed
+                        ? '賛同済み ✓ ($_agreeCount)'
+                        : 'これは問題 ($_agreeCount)',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                ],
+                ),
               ),
             ],
           ),

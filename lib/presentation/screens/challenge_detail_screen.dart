@@ -355,6 +355,13 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
               ],
 
               const SizedBox(height: AppSpacing.lg),
+              _AgreeSection(
+                challengeId: challenge.id,
+                initialAgreeCount: challenge.agreeCount,
+                color: color,
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 key: _policyKey,
                 'あなたなら、どの対策案を選ぶ？',
@@ -931,6 +938,68 @@ class _AgencyContactCard extends StatelessWidget {
             style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AgreeSection extends ConsumerStatefulWidget {
+  final String challengeId;
+  final int initialAgreeCount;
+  final Color color;
+
+  const _AgreeSection({
+    required this.challengeId,
+    required this.initialAgreeCount,
+    required this.color,
+  });
+
+  @override
+  ConsumerState<_AgreeSection> createState() => _AgreeSectionState();
+}
+
+class _AgreeSectionState extends ConsumerState<_AgreeSection> {
+  late int _agreeCount = widget.initialAgreeCount;
+  bool _agreed = false;
+
+  Future<void> _onAgree() async {
+    if (_agreed) return;
+    final result = await ref.read(
+      agreeChallengeProvider(widget.challengeId).future,
+    );
+    if (result && mounted) {
+      setState(() {
+        _agreeCount++;
+        _agreed = true;
+      });
+      ref
+          .read(agreedChallengeIdsProvider.notifier)
+          .update((ids) => {...ids, widget.challengeId});
+      AnalyticsService().logAgreeSubmitted(challengeId: widget.challengeId);
+      final newlyUnlocked = await CheckNewAchievements.call(
+        () => ActivityStore().addVotedChallenge(widget.challengeId),
+      );
+      if (newlyUnlocked.isNotEmpty && mounted) {
+        showAchievementUnlockDialogs(context, newlyUnlocked);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: _agreed ? null : _onAgree,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          side: BorderSide(color: _agreed ? AppColors.border : widget.color),
+          foregroundColor: _agreed ? AppColors.textMuted : widget.color,
+        ),
+        child: Text(
+          _agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        ),
       ),
     );
   }
