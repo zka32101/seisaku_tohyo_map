@@ -10,6 +10,7 @@ import 'challenge_list_screen.dart';
 import 'donation_screen.dart';
 import 'glossary_screen.dart';
 import 'my_page_screen.dart';
+import 'prefecture_aging_screen.dart';
 import 'quiz_screen.dart';
 import 'ranking_screen.dart';
 import 'time_machine_screen.dart';
@@ -188,6 +189,22 @@ class MacroDashboardScreen extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.access_time, size: 18),
                 label: const Text('政策でどう変わる？タイムマシンで見る'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const PrefectureAgingScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.map_outlined, size: 18),
+                label: const Text('過疎・高齢化はどこで進んでいる？都道府県別に見る'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
