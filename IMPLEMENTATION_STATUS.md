@@ -1,7 +1,27 @@
 # 日本の未来マップ — 実装ステータス
 
-**最終更新**: 2026-07-27  
-**フェーズ**: Android版のFirebaseプロジェクト統一・投票不具合の根本修正（ビルド5）
+**最終更新**: 2026-07-28  
+**フェーズ**: 課題一覧の投票ボタン廃止・CI用GitHubアカウント(zkacry)への移行・ビルド5でApp Store審査提出
+
+## 77. CI用GitHubアカウントをzkacryに移行・ビルド5でApp Store審査提出（2026-07-28）
+- 従来のCI用アカウント`zka32103-coder`が支払い停止でCI実行不能になったため、新アカウント
+  `zkacry`でリポジトリ`japan_future_map`を新規作成し、`git remote add origin-zkacry`で追加。
+  iOS署名用Secrets（APP_STORE_CONNECT_API_KEY_BASE64・ISSUER_ID・KEY_ID・FASTLANE_TEAM_ID・
+  IOS_DIST_CERT_BASE64・IOS_DIST_CERT_PASSWORD・IOS_PROVISION_PROFILE_BASE64）を
+  `H:\マイドライブ\key\`・`ios-signing\`のローカル保存ファイルから再設定（Issuer IDは
+  [[reference_apple_appstore_connect_credentials]]のメモリから復元）。動作確認のテストビルド成功
+- Android統一+投票修正（#75）・投票ボタン廃止（#76）を含むビルド5でTestFlightアップロード済み。
+  App Store Connect側で連絡先情報・スクリーンショット（iPhone 1284×2778px・iPad 2048×2732px）を
+  設定し、ビルド5を選択した状態で審査提出完了（2026-07-28）
+
+## 76. 課題一覧「投票する」ボタンの削除・「これは問題」ボタンの一本化（2026-07-28）
+- 課題一覧カードの「投票する」ボタンを削除し、「これは問題」（賛同）を主要アクションに統一。
+  課題詳細画面にも同じ「これは問題」ボタンを対策案セクションの直上に新規追加（`_AgreeSection`）
+- 使われなくなった`voteChallengeProvider`・`FirebaseService.voteChallenge()`を削除
+- おすすめ機能・実績バッジ（「一票を投じた」「投票マスター」等）の判定基準を、廃止した投票
+  （`votedChallengeIdsProvider`）から賛同（`agreedChallengeIdsProvider`にリネーム）ベースに変更。
+  マイページの表示文言（「あなたが投票した課題」→「あなたが賛同した課題」等）も整合させた
+- `flutter analyze`・`flutter test`（35件）ともにC:\apk同期コピー上でPASSを確認
 
 ## 75. Android版のFirebaseプロジェクト統一とFirestore投票不具合の根本修正（2026-07-27）
 実機（Android）で「投票できない」を報告いただき、4段階の根本原因が見つかった。
