@@ -604,15 +604,11 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
                   onPressed: _agreed ? null : _onAgree,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(
-                      color: _agreed ? AppColors.border : color,
-                    ),
+                    side: BorderSide(color: _agreed ? AppColors.border : color),
                     foregroundColor: _agreed ? AppColors.textMuted : color,
                   ),
                   child: Text(
-                    _agreed
-                        ? '賛同済み ✓ ($_agreeCount)'
-                        : 'これは問題 ($_agreeCount)',
+                    _agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
