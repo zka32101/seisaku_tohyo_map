@@ -42,6 +42,7 @@ class UserProposal {
   final String? submissionNote; // 提出先・経緯などの自由記述
   final String? submissionUrl; // 提出した先の一次情報（あれば）
   final DateTime? submissionDate;
+  final String? userId; // 投稿者の匿名認証UID（削除・通報・ブロック機能に使用）
 
   const UserProposal({
     required this.id,
@@ -54,6 +55,7 @@ class UserProposal {
     this.submissionNote,
     this.submissionUrl,
     this.submissionDate,
+    this.userId,
   });
 
   // この投票数を超えると「正式課題候補」として一覧の上部に表示される

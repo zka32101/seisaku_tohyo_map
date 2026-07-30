@@ -31,6 +31,7 @@ import '../widgets/chart_axis.dart';
 import '../widgets/glossary_text.dart';
 import '../widgets/international_comparison_section.dart';
 import '../widgets/offline_banner.dart';
+import '../widgets/ugc_action_menu.dart';
 import 'glossary_screen.dart';
 
 class ChallengeDetailScreen extends ConsumerStatefulWidget {
@@ -1691,13 +1692,15 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
                 ),
               );
             }
+            final blockedIds = ref.watch(blockedUserIdsProvider);
             // いいねが多い順→新しい順で並べ、人気のコメントが埋もれないようにする
-            final sorted = [...comments]
-              ..sort((a, b) {
-                final byLikes = b.likeCount.compareTo(a.likeCount);
-                if (byLikes != 0) return byLikes;
-                return b.createdAt.compareTo(a.createdAt);
-              });
+            final sorted =
+                [...comments.where((c) => !blockedIds.contains(c.userId))]
+                  ..sort((a, b) {
+                    final byLikes = b.likeCount.compareTo(a.likeCount);
+                    if (byLikes != 0) return byLikes;
+                    return b.createdAt.compareTo(a.createdAt);
+                  });
             return Column(
               children: sorted
                   .map(
@@ -1806,6 +1809,13 @@ class _CommentTile extends ConsumerWidget {
                     ],
                   ),
                 ),
+              ),
+              const Spacer(),
+              UgcActionMenu(
+                contentType: 'comment',
+                contentId: comment.id,
+                challengeId: challengeId,
+                authorUserId: comment.userId,
               ),
             ],
           ),

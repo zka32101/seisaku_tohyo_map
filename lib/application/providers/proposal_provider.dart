@@ -24,6 +24,7 @@ final submitProposalProvider =
       if (userId == null) return null;
 
       final proposalId = await service.submitProposal(
+        userId: userId,
         title: params.title,
         description: params.description,
         category: params.category,
@@ -33,6 +34,19 @@ final submitProposalProvider =
       }
       return proposalId;
     });
+
+// 課題提案の削除（投稿者本人のみ）
+final deleteProposalProvider = FutureProvider.family<bool, String>((
+  ref,
+  proposalId,
+) async {
+  final service = ref.watch(firebaseServiceProvider);
+  final result = await service.deleteProposal(proposalId);
+  if (result) {
+    ref.read(proposalsRefreshProvider.notifier).state++;
+  }
+  return result;
+});
 
 // このセッションで投票した提案ID
 final votedProposalIdsProvider = StateProvider<Set<String>>((ref) => {});

@@ -4,6 +4,7 @@ import '../../domain/entities/challenge.dart';
 import '../../domain/entities/comment.dart';
 import '../../domain/entities/policy_option.dart';
 import '../../infrastructure/firebase/firebase_service.dart';
+import '../../infrastructure/local_storage/blocked_users_store.dart';
 import '../usecases/load_policy_options.dart';
 
 final firebaseServiceProvider = Provider((ref) => FirebaseService());
@@ -72,12 +73,79 @@ final postCommentProvider =
       final userId = await ref.read(userIdProvider.future);
       if (userId == null) return false;
 
-      final result = await service.postComment(params.challengeId, params.text);
+      final result = await service.postComment(
+        userId,
+        params.challengeId,
+        params.text,
+      );
       if (result) {
         ref.read(commentsRefreshProvider.notifier).state++;
       }
       return result;
     });
+
+// コメントの削除（投稿者本人のみ）
+final deleteCommentProvider =
+    FutureProvider.family<bool, ({String challengeId, String commentId})>((
+      ref,
+      params,
+    ) async {
+      final service = ref.watch(firebaseServiceProvider);
+      final result = await service.deleteComment(
+        params.challengeId,
+        params.commentId,
+      );
+      if (result) {
+        ref.read(commentsRefreshProvider.notifier).state++;
+      }
+      return result;
+    });
+
+// 不適切な投稿の通報
+final reportContentProvider =
+    FutureProvider.family<
+      bool,
+      ({
+        String contentType,
+        String contentId,
+        String? challengeId,
+        String? reason,
+      })
+    >((ref, params) async {
+      final service = ref.watch(firebaseServiceProvider);
+      final userId = await ref.read(userIdProvider.future);
+      if (userId == null) return false;
+
+      return await service.reportContent(
+        userId: userId,
+        contentType: params.contentType,
+        contentId: params.contentId,
+        challengeId: params.challengeId,
+        reason: params.reason,
+      );
+    });
+
+// ブロックしたユーザーID一覧（端末ローカルに保存、投稿の非表示に使用）
+final blockedUserIdsProvider =
+    StateNotifierProvider<BlockedUserIdsNotifier, Set<String>>(
+      (ref) => BlockedUserIdsNotifier(),
+    );
+
+class BlockedUserIdsNotifier extends StateNotifier<Set<String>> {
+  BlockedUserIdsNotifier() : super(BlockedUsersStore.getAll()) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    await BlockedUsersStore.init();
+    state = BlockedUsersStore.getAll();
+  }
+
+  Future<void> block(String userId) async {
+    await BlockedUsersStore.add(userId);
+    state = BlockedUsersStore.getAll();
+  }
+}
 
 // このセッションでいいねしたコメントID
 final likedCommentIdsProvider = StateProvider<Set<String>>((ref) => {});

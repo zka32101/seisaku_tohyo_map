@@ -231,14 +231,19 @@ service cloud.firestore {
         allow read: if request.auth != null && request.auth.uid == userId;
         allow write: if request.auth != null && request.auth.uid == userId;
       }
+      // 投稿の削除（即時削除機能）・通報／ブロック機能のために、投稿者UIDを
+      // request.auth.uidと一致させることを作成時に必須化し、本人のみ削除できるようにした
+      // （2026-07-28、UGC関連のApp Store審査対応）。
       match /comments/{commentId} {
         allow read: if true;
         allow create: if request.auth != null
           && request.resource.data.text is string
-          && request.resource.data.text.size() <= 140;
+          && request.resource.data.text.size() <= 140
+          && request.resource.data.userId == request.auth.uid;
         allow update: if request.auth != null
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount']);
-        allow delete: if false;
+        allow delete: if request.auth != null
+          && request.auth.uid == resource.data.userId;
 
         match /likes/{userId} {
           allow read: if request.auth != null && request.auth.uid == userId;
@@ -265,17 +270,29 @@ service cloud.firestore {
         && request.resource.data.title is string
         && request.resource.data.title.size() <= 40
         && request.resource.data.description is string
-        && request.resource.data.description.size() <= 300;
+        && request.resource.data.description.size() <= 300
+        && request.resource.data.userId == request.auth.uid;
       // voteCount はいいねと同様の増分更新のみ許可。submissionStatus 等の管理項目は
       // Firebase Console から手動更新する運用のため、アプリからは変更できないようにする
       allow update: if request.auth != null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['voteCount']);
-      allow delete: if false;
+      allow delete: if request.auth != null
+        && request.auth.uid == resource.data.userId;
 
       match /votes/{userId} {
         allow read: if request.auth != null && request.auth.uid == userId;
         allow write: if request.auth != null && request.auth.uid == userId;
       }
+    }
+
+    // 不適切な投稿の通報（App Store/Google Playガイドライン対応、2026-07-28）。
+    // 通報内容は本人にも他人にも読めないようにし（Firebase Console経由でのみ運営が確認・対応する）、
+    // 誰が通報したかを偽装できないようreportedByをauth.uidと一致させる。
+    match /reports/{reportId} {
+      allow read: if false;
+      allow create: if request.auth != null
+        && request.resource.data.reportedBy == request.auth.uid;
+      allow update, delete: if false;
     }
   }
 }

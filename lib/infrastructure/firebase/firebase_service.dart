@@ -1033,7 +1033,11 @@ class FirebaseService {
   }
 
   // 課題へのコメントを投稿
-  Future<bool> postComment(String challengeId, String text) async {
+  Future<bool> postComment(
+    String userId,
+    String challengeId,
+    String text,
+  ) async {
     try {
       await _firestore
           .collection('challenges')
@@ -1042,12 +1046,56 @@ class FirebaseService {
           .add({
             'text': text,
             'likeCount': 0,
+            'userId': userId,
             'createdAt': FieldValue.serverTimestamp(),
           });
       _logger.i('Comment posted for challenge: $challengeId');
       return true;
     } catch (e) {
       _logger.e('Error posting comment: $e');
+      return false;
+    }
+  }
+
+  // 自分のコメントを削除（即時削除機能）
+  Future<bool> deleteComment(String challengeId, String commentId) async {
+    try {
+      await _firestore
+          .collection('challenges')
+          .doc(challengeId)
+          .collection('comments')
+          .doc(commentId)
+          .delete();
+      _logger.i('Comment deleted: $commentId');
+      return true;
+    } catch (e) {
+      _logger.e('Error deleting comment: $e');
+      return false;
+    }
+  }
+
+  // 不適切な投稿を通報する（コメント・提案共通）
+  Future<bool> reportContent({
+    required String userId,
+    required String contentType, // 'comment' or 'proposal'
+    required String contentId,
+    String? challengeId,
+    String? reason,
+  }) async {
+    try {
+      await _firestore.collection('reports').add({
+        'contentType': contentType,
+        'contentId': contentId,
+        'challengeId': challengeId,
+        'reason': reason,
+        'reportedBy': userId,
+        'status': 'open',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      _logger.i('Reported $contentType: $contentId');
+      return true;
+    } catch (e) {
+      _logger.e('Error reporting content: $e');
       return false;
     }
   }
@@ -1105,6 +1153,7 @@ class FirebaseService {
           text: data['text'] ?? '',
           createdAt: timestamp?.toDate() ?? DateTime.now(),
           likeCount: data['likeCount'] ?? 0,
+          userId: data['userId'] as String?,
         );
       }).toList();
     } catch (e) {
@@ -1173,6 +1222,7 @@ class FirebaseService {
 
   // ユーザーからの課題提案を投稿（成功時は新規ドキュメントIDを返す）
   Future<String?> submitProposal({
+    required String userId,
     required String title,
     required String description,
     required String category,
@@ -1184,6 +1234,7 @@ class FirebaseService {
         'category': category,
         'voteCount': 0,
         'submissionStatus': 'none',
+        'userId': userId,
         'createdAt': FieldValue.serverTimestamp(),
       });
       _logger.i('Proposal submitted: $title');
@@ -1191,6 +1242,18 @@ class FirebaseService {
     } catch (e) {
       _logger.e('Error submitting proposal: $e');
       return null;
+    }
+  }
+
+  // 自分の提案を削除（即時削除機能）
+  Future<bool> deleteProposal(String proposalId) async {
+    try {
+      await _firestore.collection('userProposals').doc(proposalId).delete();
+      _logger.i('Proposal deleted: $proposalId');
+      return true;
+    } catch (e) {
+      _logger.e('Error deleting proposal: $e');
+      return false;
     }
   }
 
@@ -1253,6 +1316,7 @@ class FirebaseService {
       submissionNote: data['submissionNote'] as String?,
       submissionUrl: data['submissionUrl'] as String?,
       submissionDate: submissionTimestamp?.toDate(),
+      userId: data['userId'] as String?,
     );
   }
 

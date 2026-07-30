@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/providers/firebase_provider.dart';
 import '../../application/providers/proposal_provider.dart';
 import '../../application/usecases/check_new_achievements.dart';
 import '../../domain/entities/user_proposal.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/achievement_unlock_dialog.dart';
+import '../widgets/ugc_action_menu.dart';
 import 'submit_proposal_screen.dart';
 
 class ProposalListScreen extends ConsumerWidget {
@@ -15,13 +17,17 @@ class ProposalListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final proposalsAsync = ref.watch(proposalsProvider);
+    final blockedIds = ref.watch(blockedUserIdsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('みんなの提案')),
       body: proposalsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('エラー: $err')),
-        data: (proposals) {
+        data: (allProposals) {
+          final proposals = allProposals
+              .where((p) => !blockedIds.contains(p.userId))
+              .toList();
           if (proposals.isEmpty) {
             return const Center(
               child: Padding(
@@ -197,6 +203,11 @@ class _ProposalCardState extends ConsumerState<_ProposalCard> {
                   color: AppColors.textMuted,
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+              UgcActionMenu(
+                contentType: 'proposal',
+                contentId: widget.proposal.id,
+                authorUserId: widget.proposal.userId,
               ),
             ],
           ),

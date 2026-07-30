@@ -122,6 +122,26 @@ class ActivityStore {
     }
   }
 
+  // コンテンツポリシー（不適切な投稿・迷惑ユーザーを許容しない旨）への同意
+  bool get hasAcceptedContentPolicy {
+    try {
+      return _box?.get('hasAcceptedContentPolicy', defaultValue: false)
+              as bool? ??
+          false;
+    } catch (e) {
+      _logger.e('Error reading hasAcceptedContentPolicy: $e');
+      return false;
+    }
+  }
+
+  Future<void> markContentPolicyAccepted() async {
+    try {
+      await _box?.put('hasAcceptedContentPolicy', true);
+    } catch (e) {
+      _logger.e('Error writing hasAcceptedContentPolicy: $e');
+    }
+  }
+
   // 実績バッジ判定用のスナップショット（マイページ表示・新規解除の差分検出の両方に使う）
   ActivityStats currentStats() {
     return ActivityStats(

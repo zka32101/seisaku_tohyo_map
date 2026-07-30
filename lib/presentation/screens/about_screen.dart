@@ -59,6 +59,18 @@ class AboutScreen extends StatelessWidget {
                 '制度改正や国会審議の進捗により内容が変わることがあるため、各課題の「情報時点」表示と'
                 '出典リンクをあわせてご確認ください。',
           ),
+          const SizedBox(height: AppSpacing.md),
+
+          const _SectionCard(
+            title: '不適切な投稿について',
+            icon: Icons.flag_outlined,
+            body:
+                '誹謗中傷・差別的表現・個人情報の暴露・スパム等の不適切な投稿は禁止しています。'
+                '各コメント・提案のメニューから「報告する」ことで運営に通報でき、'
+                '通報内容は24時間以内に確認のうえ、削除等の対応を行います。'
+                '苦手なユーザーは「ブロック」から非表示にでき、自分の投稿はいつでも削除できます。'
+                '緊急の通報や、アプリ内で対応できない場合は下記の連絡先まで直接ご連絡ください。',
+          ),
           const SizedBox(height: AppSpacing.lg),
 
           const Text(
@@ -77,6 +89,12 @@ class AboutScreen extends StatelessWidget {
             label: 'サポート・お問い合わせ',
             url:
                 'https://zka32103-coder.github.io/petitworks-legal/nihon_future_map/support.html',
+          ),
+          _LinkRow(
+            icon: Icons.mail_outline,
+            label: '運営に直接メールで連絡する（不適切な投稿の通報含む）',
+            url:
+                'mailto:petitworksdev@gmail.com?subject=${Uri.encodeComponent('【日本の未来マップ】お問い合わせ')}',
           ),
           const SizedBox(height: AppSpacing.lg),
 
