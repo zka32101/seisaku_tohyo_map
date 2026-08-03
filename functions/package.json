@@ -1,0 +1,14 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for 日本の未来マップ (report notification email)",
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^14.2.0",
+    "firebase-functions": "^7.3.2",
+    "nodemailer": "^6.9.16"
+  },
+  "private": true
+}

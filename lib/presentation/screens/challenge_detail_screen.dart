@@ -1681,14 +1681,23 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
                   ref.watch(connectivityProvider).valueOrNull ?? true;
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: Text(
-                  isOnline
-                      ? 'まだコメントはありません。最初の声を届けてみましょう。'
-                      : 'オフラインのため最新のコメントを取得できません。',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textMuted,
-                  ),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/empty_state_comments.png',
+                      height: 56,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      isOnline
+                          ? 'まだコメントはありません。最初の声を届けてみましょう。'
+                          : 'オフラインのため最新のコメントを取得できません。',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }

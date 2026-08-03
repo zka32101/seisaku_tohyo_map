@@ -102,6 +102,13 @@ class _DonationScreenState extends State<DonationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Image.asset(
+                  'assets/images/donation_header.png',
+                  height: 100,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.md),

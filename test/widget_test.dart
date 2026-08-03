@@ -7,15 +7,15 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: MyApp()));
     await tester.pump();
 
-    expect(find.text('ご利用の前に'), findsOneWidget);
-    expect(find.text('同意して始める'), findsOneWidget);
+    expect(find.text('ご利用の前に / Before you continue'), findsOneWidget);
+    expect(find.text('同意して始める / Agree & Continue'), findsOneWidget);
   });
 
   testWidgets('同意するとダッシュボード画面が表示される', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: MyApp()));
     await tester.pump();
 
-    await tester.tap(find.text('同意して始める'));
+    await tester.tap(find.text('同意して始める / Agree & Continue'));
     await tester.pump();
     await tester.pump();
 
