@@ -278,6 +278,7 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
                     year: '2046年ごろ',
                     icon: Icons.hourglass_bottom,
                     text: detail.outlook20Years!,
+                    imageAsset: 'assets/images/future_vision_20y.png',
                   ),
                 if (detail.outlook50Years != null) ...[
                   const SizedBox(height: AppSpacing.sm),
@@ -286,6 +287,7 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
                     year: '2076年ごろ',
                     icon: Icons.hourglass_disabled,
                     text: detail.outlook50Years!,
+                    imageAsset: 'assets/images/future_vision_50y.png',
                   ),
                 ],
               ],
@@ -1316,12 +1318,14 @@ class _OutlookCard extends StatelessWidget {
   final String year;
   final IconData icon;
   final String text;
+  final String? imageAsset;
 
   const _OutlookCard({
     required this.label,
     required this.year,
     required this.icon,
     required this.text,
+    this.imageAsset,
   });
 
   @override
@@ -1359,6 +1363,10 @@ class _OutlookCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
+          if (imageAsset != null) ...[
+            Center(child: Image.asset(imageAsset!, height: 64)),
+            const SizedBox(height: 8),
+          ],
           GlossaryText(text, style: const TextStyle(fontSize: 13, height: 1.6)),
         ],
       ),

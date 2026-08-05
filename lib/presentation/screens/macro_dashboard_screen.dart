@@ -14,6 +14,7 @@ import 'prefecture_aging_screen.dart';
 import 'quiz_screen.dart';
 import 'ranking_screen.dart';
 import 'time_machine_screen.dart';
+import 'urgency_matrix_screen.dart';
 
 class MacroDashboardScreen extends ConsumerWidget {
   const MacroDashboardScreen({super.key});
@@ -189,6 +190,22 @@ class MacroDashboardScreen extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.access_time, size: 18),
                 label: const Text('政策でどう変わる？タイムマシンで見る'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const UrgencyMatrixScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.grid_view, size: 18),
+                label: const Text('何から向き合うべき？緊急重要マトリクスで見る'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
