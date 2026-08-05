@@ -36,7 +36,11 @@ class LoadUrgencyImportance {
       urgency: 3,
       importance: 5,
     ),
-    UrgencyImportance(challengeId: 'reform_deferral', urgency: 3, importance: 4),
+    UrgencyImportance(
+      challengeId: 'reform_deferral',
+      urgency: 3,
+      importance: 4,
+    ),
     UrgencyImportance(
       challengeId: 'bureaucracy_influence',
       urgency: 2,
@@ -111,7 +115,11 @@ class LoadUrgencyImportance {
       urgency: 5,
       importance: 5,
     ),
-    UrgencyImportance(challengeId: 'healthcare_cost', urgency: 4, importance: 5),
+    UrgencyImportance(
+      challengeId: 'healthcare_cost',
+      urgency: 4,
+      importance: 5,
+    ),
     UrgencyImportance(challengeId: 'education_gap', urgency: 3, importance: 5),
     UrgencyImportance(
       challengeId: 'women_in_politics',
@@ -138,7 +146,11 @@ class LoadUrgencyImportance {
       urgency: 3,
       importance: 4,
     ),
-    UrgencyImportance(challengeId: 'housing_vacancy', urgency: 3, importance: 3),
+    UrgencyImportance(
+      challengeId: 'housing_vacancy',
+      urgency: 3,
+      importance: 3,
+    ),
     UrgencyImportance(
       challengeId: 'childcare_waitlist',
       urgency: 3,
@@ -167,13 +179,21 @@ class LoadUrgencyImportance {
     ),
     UrgencyImportance(challengeId: 'young_carers', urgency: 4, importance: 4),
     UrgencyImportance(challengeId: 'digital_divide', urgency: 3, importance: 3),
-    UrgencyImportance(challengeId: 'isolated_elderly', urgency: 5, importance: 4),
+    UrgencyImportance(
+      challengeId: 'isolated_elderly',
+      urgency: 5,
+      importance: 4,
+    ),
     UrgencyImportance(
       challengeId: 'non_regular_employment',
       urgency: 3,
       importance: 4,
     ),
-    UrgencyImportance(challengeId: 'low_startup_rate', urgency: 2, importance: 4),
+    UrgencyImportance(
+      challengeId: 'low_startup_rate',
+      urgency: 2,
+      importance: 4,
+    ),
     UrgencyImportance(
       challengeId: 'caregiver_shortage',
       urgency: 5,

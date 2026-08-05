@@ -53,7 +53,11 @@ class UrgencyMatrixScreen extends ConsumerWidget {
               const Text(
                 '「緊急度」×「重要度」の2軸で、日本の課題を4つに整理しました。'
                 'タップすると詳細を見られます。',
-                style: TextStyle(fontSize: 12, color: AppColors.textMuted, height: 1.5),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               _QuadrantCard(
@@ -147,7 +151,10 @@ class _QuadrantCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 '${challenges.length}件',
-                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                ),
               ),
             ],
           ),
