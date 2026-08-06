@@ -7,6 +7,9 @@ class AgencyContact {
   final String summary; // 問い合わせた内容の要約
   final String? responseSummary; // 先方からの回答内容の要約（あれば）
   final String contactDate; // 問い合わせた時点（例: 2026年7月）
+  // この問い合わせが特定の対策案（PolicyOption）に紐づく場合に設定する。
+  // nullの場合は課題全体への問い合わせ（対策案を特定しない一般的な問い合わせ）を表す。
+  final String? policyOptionId;
 
   const AgencyContact({
     required this.id,
@@ -17,5 +20,6 @@ class AgencyContact {
     required this.summary,
     this.responseSummary,
     required this.contactDate,
+    this.policyOptionId,
   });
 }

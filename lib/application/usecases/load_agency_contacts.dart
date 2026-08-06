@@ -10,6 +10,17 @@ class LoadAgencyContacts {
     return _data[challengeId] ?? const [];
   }
 
+  // 特定の対策案（PolicyOption）に紐づく問い合わせ記録のみを返す
+  // （運営者がその対策案を関係組織へ提出・提案済みかどうかの判定に使用）
+  static List<AgencyContact> forPolicyOption(
+    String challengeId,
+    String policyOptionId,
+  ) {
+    return forChallenge(
+      challengeId,
+    ).where((c) => c.policyOptionId == policyOptionId).toList();
+  }
+
   // 問い合わせ記録が存在する課題IDの一覧（一覧・マップでのバッジ表示判定に使用）
   static List<String> get challengeIds => _data.keys.toList();
 

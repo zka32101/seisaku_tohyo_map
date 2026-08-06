@@ -439,7 +439,6 @@ class _ChallengeCard extends ConsumerStatefulWidget {
 class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
   late int _voteCount;
   late int _agreeCount;
-  bool _agreed = false;
 
   @override
   void initState() {
@@ -449,14 +448,16 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
   }
 
   Future<void> _onAgree() async {
-    if (_agreed) return;
+    // 課題詳細画面など他画面で既に賛同済みの場合はここでも再度押せないようにする
+    if (ref.read(agreedChallengeIdsProvider).contains(widget.challenge.id)) {
+      return;
+    }
     final result = await ref.read(
       agreeChallengeProvider(widget.challenge.id).future,
     );
     if (result && mounted) {
       setState(() {
         _agreeCount++;
-        _agreed = true;
       });
       ref
           .read(agreedChallengeIdsProvider.notifier)
@@ -474,6 +475,11 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
   @override
   Widget build(BuildContext context) {
     final color = AppColors.categoryColor(widget.challenge.category);
+    final agreed = ref.watch(
+      agreedChallengeIdsProvider.select(
+        (ids) => ids.contains(widget.challenge.id),
+      ),
+    );
 
     return Material(
       color: AppColors.surface,
@@ -601,14 +607,14 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: _agreed ? null : _onAgree,
+                  onPressed: agreed ? null : _onAgree,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(color: _agreed ? AppColors.border : color),
-                    foregroundColor: _agreed ? AppColors.textMuted : color,
+                    side: BorderSide(color: agreed ? AppColors.border : color),
+                    foregroundColor: agreed ? AppColors.textMuted : color,
                   ),
                   child: Text(
-                    _agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
+                    agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),

@@ -963,17 +963,18 @@ class _AgreeSection extends ConsumerStatefulWidget {
 
 class _AgreeSectionState extends ConsumerState<_AgreeSection> {
   late int _agreeCount = widget.initialAgreeCount;
-  bool _agreed = false;
 
   Future<void> _onAgree() async {
-    if (_agreed) return;
+    // 課題一覧画面など他画面で既に賛同済みの場合はここでも再度押せないようにする
+    if (ref.read(agreedChallengeIdsProvider).contains(widget.challengeId)) {
+      return;
+    }
     final result = await ref.read(
       agreeChallengeProvider(widget.challengeId).future,
     );
     if (result && mounted) {
       setState(() {
         _agreeCount++;
-        _agreed = true;
       });
       ref
           .read(agreedChallengeIdsProvider.notifier)
@@ -990,17 +991,22 @@ class _AgreeSectionState extends ConsumerState<_AgreeSection> {
 
   @override
   Widget build(BuildContext context) {
+    final agreed = ref.watch(
+      agreedChallengeIdsProvider.select(
+        (ids) => ids.contains(widget.challengeId),
+      ),
+    );
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton(
-        onPressed: _agreed ? null : _onAgree,
+        onPressed: agreed ? null : _onAgree,
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 14),
-          side: BorderSide(color: _agreed ? AppColors.border : widget.color),
-          foregroundColor: _agreed ? AppColors.textMuted : widget.color,
+          side: BorderSide(color: agreed ? AppColors.border : widget.color),
+          foregroundColor: agreed ? AppColors.textMuted : widget.color,
         ),
         child: Text(
-          _agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
+          agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
@@ -1254,6 +1260,32 @@ class _PolicyOptionCardState extends ConsumerState<_PolicyOptionCard> {
               ],
             ),
           ),
+          if (LoadAgencyContacts.forPolicyOption(
+            widget.challengeId,
+            widget.option.id,
+          ).isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(
+                  Icons.mark_email_read_outlined,
+                  size: 13,
+                  color: AppColors.success,
+                ),
+                const SizedBox(width: 4),
+                const Expanded(
+                  child: Text(
+                    '運営者がこの対策案を関係組織へ提出済み',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.success,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.sm),
           if (widget.hasVoted) ...[
             Row(
