@@ -46,3 +46,11 @@ app.*.map.json
 
 # iOS署名用の秘密鍵・証明書（GitHub Secretsに登録済み。リポジトリには含めない）
 /ios-signing/
+
+# Firebase configuration (DO NOT COMMIT)
+google-services.json
+GoogleService-Info.plist
+.firebaserc
+*.mobileprovision
+*.p8
+*.p12
