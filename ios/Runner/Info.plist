@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>日本の未来マップ</string>
+	<string>政策投票マップ</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>ja</string>

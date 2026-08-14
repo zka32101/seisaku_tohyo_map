@@ -1,5 +1,5 @@
 name: nihon_future_map
-description: "A new Flutter project."
+description: "政策投票マップ - 国会議案を可視化し、あなたの投票で未来を変える。"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

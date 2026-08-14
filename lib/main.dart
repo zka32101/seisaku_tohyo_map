@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      title: '日本の未来マップ',
+      title: '政策投票マップ',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       home: const _AppGate(),
