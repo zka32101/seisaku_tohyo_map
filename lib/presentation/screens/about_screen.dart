@@ -17,7 +17,7 @@ class AboutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
           Text(
-            '日本の未来マップ',
+            '政策投票マップ',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 4),
@@ -94,7 +94,7 @@ class AboutScreen extends StatelessWidget {
             icon: Icons.mail_outline,
             label: '運営に直接メールで連絡する（不適切な投稿の通報含む）',
             url:
-                'mailto:petitworksdev@gmail.com?subject=${Uri.encodeComponent('【日本の未来マップ】お問い合わせ')}',
+                'mailto:petitworksdev@gmail.com?subject=${Uri.encodeComponent('【政策投票マップ】お問い合わせ')}',
           ),
           const SizedBox(height: AppSpacing.lg),
 

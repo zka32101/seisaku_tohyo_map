@@ -1102,7 +1102,7 @@ class _PolicyOptionsSection extends ConsumerWidget {
         .join('\n');
 
     final text =
-        '日本の未来マップ 対策案投票\n'
+        '政策投票マップ 対策案投票\n'
         '「$challengeName」について、私は\n'
         '「${selected.title}」を選びました\n\n'
         '【投票結果】\n'

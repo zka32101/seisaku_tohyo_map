@@ -73,7 +73,7 @@ class _AgeInputScreenState extends ConsumerState<AgeInputScreen> {
     final signedAmount =
         '${pension.isInTheMinus ? '△' : '+'}¥${(pension.netLoss.abs() / 10000).toStringAsFixed(0)}万円';
     final text =
-        '日本の未来マップ 診断結果\n'
+        '政策投票マップ 診断結果\n'
         '${pension.age}歳の生涯年金損益: $signedAmount\n'
         'あなたの結果もチェックしてみよう！';
 
@@ -89,7 +89,7 @@ class _AgeInputScreenState extends ConsumerState<AgeInputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('日本の未来マップ')),
+      appBar: AppBar(title: const Text('政策投票マップ')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

@@ -1,7 +1,7 @@
 # iOS ビルド・配布ガイド
 
 ## プロジェクト概要
-- **アプリ名**: 日本の未来マップ (nihon_future_map)
+- **アプリ名**: 政策投票マップ (nihon_future_map)
 - **Bundle ID**: jp.petti-works.nihon-future-map (予定)
 - **Platform**: iOS 13.0+
 - **フレームワーク**: Flutter + Firebase

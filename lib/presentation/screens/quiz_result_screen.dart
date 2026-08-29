@@ -153,7 +153,7 @@ class QuizResultScreen extends ConsumerWidget {
       return '🟥';
     }).join();
 
-    return '日本の未来マップ 診断結果 ${result.level.emoji}\n'
+    return '政策投票マップ 診断結果 ${result.level.emoji}\n'
         '${result.level.title}（正答度${result.averageAccuracy.toStringAsFixed(0)}%）\n'
         '$emojiRow\n'
         'あなたも社会課題への感覚をチェックしてみよう！';

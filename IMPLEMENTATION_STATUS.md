@@ -1,7 +1,36 @@
-# 日本の未来マップ — 実装ステータス
+# 政策投票マップ（旧: 日本の未来マップ） — 実装ステータス
 
-**最終更新**: 2026-07-28  
-**フェーズ**: 課題一覧の投票ボタン廃止・CI用GitHubアカウント(zkacry)への移行・ビルド5でApp Store審査提出
+**最終更新**: 2026-08-29  
+**フェーズ**: アプリ名を「政策投票マップ」に変更・リポジトリ名変更(seisaku_tohyo_map)・GitHubリポジトリPrivate化
+
+## 78. アプリ名変更「政策投票マップ」の反映漏れ修正・GitHubリポジトリ改名/Private化（2026-08-29）
+- PRベースでアプリ名を「日本の未来マップ」→「政策投票マップ」に変更した際、`lib/main.dart`の
+  `MaterialApp.title`・`ios/Runner/Info.plist`の`CFBundleDisplayName`・
+  `android/app/src/main/AndroidManifest.xml`の`android:label`の3箇所のみ変更し、
+  **アプリ内の実際の画面テキストへの反映が漏れていた**バグを発見・修正。
+  影響箇所は7件（`about_screen.dart`のアプリ名表示・問い合わせメール件名、
+  `age_input_screen.dart`のAppBarタイトル（**ユーザーに見える形で最も影響が大きかった**）・
+  SNSシェア文言、`quiz_result_screen.dart`のシェア文言、`challenge_detail_screen.dart`の
+  対策案投票シェア文言、`loss_share_card.dart`の共有カード画像内テキスト）
+- あわせて`STORE_LISTING.md`・`PRIVACY_POLICY.md`・`USER_PROCEDURE.md`・
+  `iOS_BUILD_GUIDE.md`・`iOS_IMPLEMENTATION_CHECKLIST.md`のアプリ名表記も更新
+  （ストア掲載文中の慣用表現「日本の未来って〜」等、地の文としての言い回しはそのまま維持）
+- **再発防止メモ**: アプリ名・ブランド名を変更する際は、設定ファイル3点
+  （main.dart / Info.plist / AndroidManifest.xml）の変更だけでは不十分。
+  `grep -rn "旧アプリ名" lib/ *.md` で**全文検索し、ハードコードされた文字列リテラルを
+  漏れなく洗い出してから**変更すること（i18n化されていないアプリ名文字列が複数画面に散在するため）
+- GitHubリポジトリを`nihon_future_map`→`seisaku_tohyo_map`に改名し、Private化（ユーザー実施）。
+  ローカル`git remote`のURLは新しいコンテナ起動のたびにテンプレートの旧URLへ戻るため、
+  作業開始時に`git remote -v`で確認・必要なら再設定する運用とする
+- `pubspec.yaml`のビルド番号を`+11`→`+12`に更新（App Store提出用ビルドとの区別のため）
+
+**確認事項**:
+- ✅ 全ファイルで旧アプリ名「日本の未来マップ」の残存なし（`grep -rn`で確認、履歴用の
+  IMPLEMENTATION_STATUS.md内の過去ログ記述のみ意図的に保持）
+- ⚠️ このサンドボックス環境にFlutter SDKが導入されていないため`flutter analyze`/`flutter test`/
+  `flutter build`は実行不可。単純な文字列リテラル置換のみのためコンパイルへの影響はないと判断
+  （**次回Flutter環境がある session で`flutter test`実行し、全35+テストのPASSを確認すること**）
+- ⏸ 実機・ストア掲載情報側での最終目視確認は未実施
 
 ## 77. CI用GitHubアカウントをzkacryに移行・ビルド5でApp Store審査提出（2026-07-28）
 - 従来のCI用アカウント`zka32103-coder`が支払い停止でCI実行不能になったため、新アカウント

@@ -68,7 +68,7 @@ flutter_launcher_icons:
 ### 2. iOS ビルド設定 ✅
 
 #### 2.1 Info.plist の設定
-- [x] `CFBundleDisplayName`: "日本の未来マップ"
+- [x] `CFBundleDisplayName`: "政策投票マップ"
 - [x] `CFBundleName`: "nihon_future_map"
 - [x] `CFBundleIdentifier`: $(PRODUCT_BUNDLE_IDENTIFIER)
 - [x] `CFBundleShortVersionString`: $(FLUTTER_BUILD_NAME)

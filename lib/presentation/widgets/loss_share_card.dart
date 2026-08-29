@@ -33,7 +33,7 @@ class LossShareCard extends StatelessWidget {
               const Icon(Icons.public, size: 16, color: AppColors.primary),
               const SizedBox(width: 6),
               const Text(
-                '日本の未来マップ',
+                '政策投票マップ',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,

@@ -1,4 +1,4 @@
-# 日本の未来マップ — ユーザー実施手順
+# 政策投票マップ — ユーザー実施手順
 
 Claude側では完結できない、お手元での作業手順をまとめています。
 
@@ -62,7 +62,7 @@ Claude側では完結できない、お手元での作業手順をまとめて�
 1. https://appstoreconnect.apple.com/apps を開く（Apple Developer Program登録完了後に利用可能）
 2. 「+」→「新規App」
 3. プラットフォーム: iOS
-4. 名前: 「日本の未来マップ」（またはApp Store掲載名。他アプリと重複不可）
+4. 名前: 「政策投票マップ」（またはApp Store掲載名。他アプリと重複不可）
 5. プライマリ言語: 日本語
 6. Bundle ID: Step 2で作成した `com.yourwish.japanfuturemap` を選択
 7. SKU: 任意の一意な文字列（例: `nihonfuturemap001`。ユーザーには非表示）
