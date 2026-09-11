@@ -2,7 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// State notifier for managing user's selected interest categories
-class SelectedInterestsNotifier extends StateNotifier<AsyncValue<List<String>>> {
+class SelectedInterestsNotifier
+    extends StateNotifier<AsyncValue<List<String>>> {
   SelectedInterestsNotifier() : super(const AsyncValue.loading()) {
     _init();
   }
@@ -67,8 +68,8 @@ class SelectedInterestsNotifier extends StateNotifier<AsyncValue<List<String>>> 
 /// Riverpod provider for selected interests with automatic persistence
 final selectedInterestsProvider =
     StateNotifierProvider<SelectedInterestsNotifier, AsyncValue<List<String>>>(
-  (ref) => SelectedInterestsNotifier(),
-);
+      (ref) => SelectedInterestsNotifier(),
+    );
 
 /// State notifier for managing theme mode preference
 class ThemeModeNotifier extends StateNotifier<AsyncValue<String>> {
@@ -104,5 +105,5 @@ class ThemeModeNotifier extends StateNotifier<AsyncValue<String>> {
 /// Riverpod provider for theme mode preference with automatic persistence
 final themeModeProvider =
     StateNotifierProvider<ThemeModeNotifier, AsyncValue<String>>(
-  (ref) => ThemeModeNotifier(),
-);
+      (ref) => ThemeModeNotifier(),
+    );

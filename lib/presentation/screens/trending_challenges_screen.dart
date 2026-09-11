@@ -11,10 +11,7 @@ class TrendingChallengesScreen extends ConsumerWidget {
     final trendingAsync = ref.watch(trendingProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('トレンド'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('トレンド'), centerTitle: true),
       body: trendingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラー: $error')),

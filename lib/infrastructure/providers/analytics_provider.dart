@@ -38,8 +38,10 @@ class InterestTrend {
 }
 
 /// Riverpod provider for user analytics
-final analyticsProvider =
-    FutureProvider.family<UserAnalytics, String>((ref, userId) async {
+final analyticsProvider = FutureProvider.family<UserAnalytics, String>((
+  ref,
+  userId,
+) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
@@ -63,7 +65,8 @@ final analyticsProvider =
     for (final doc in votesSnapshot.docs) {
       final data = doc.data();
       final category = data['category'] as String? ?? '';
-      final createdAt = (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final createdAt =
+          (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now();
       final isRealized = data['realized'] as bool? ?? false;
 
       totalVotes++;

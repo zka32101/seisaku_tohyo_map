@@ -29,9 +29,7 @@ class InterestSetupScreen extends ConsumerWidget {
       ),
       body: selectedInterests.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text('エラーが発生しました: $error'),
-        ),
+        error: (error, stackTrace) => Center(child: Text('エラーが発生しました: $error')),
         data: (interests) => _buildContent(context, ref, interests),
       ),
     );
@@ -61,8 +59,10 @@ class InterestSetupScreen extends ConsumerWidget {
                         .read(selectedInterestsProvider.notifier)
                         .toggle(category);
                   },
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                 ),
               );
             },

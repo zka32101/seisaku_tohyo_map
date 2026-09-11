@@ -118,10 +118,12 @@ class _AdvancedSearchScreenState extends ConsumerState<AdvancedSearchScreen> {
                 const SizedBox(height: 8),
                 SegmentedButton<String>(
                   segments: sortOptions
-                      .map((option) => ButtonSegment(
-                            value: option,
-                            label: Text(sortLabels[option] ?? option),
-                          ))
+                      .map(
+                        (option) => ButtonSegment(
+                          value: option,
+                          label: Text(sortLabels[option] ?? option),
+                        ),
+                      )
                       .toList(),
                   selected: {_sortBy},
                   onSelectionChanged: (Set<String> newSelection) {
@@ -139,10 +141,8 @@ class _AdvancedSearchScreenState extends ConsumerState<AdvancedSearchScreen> {
           // Search results
           Expanded(
             child: searchResults.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) =>
-                  Center(child: Text('エラー: $error')),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stackTrace) => Center(child: Text('エラー: $error')),
               data: (results) {
                 if (results.isEmpty) {
                   return const Center(child: Text('検索結果がありません'));
@@ -172,8 +172,7 @@ class _AdvancedSearchScreenState extends ConsumerState<AdvancedSearchScreen> {
                               children: [
                                 Chip(
                                   label: Text(result.category),
-                                  labelStyle:
-                                      const TextStyle(fontSize: 10),
+                                  labelStyle: const TextStyle(fontSize: 10),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(

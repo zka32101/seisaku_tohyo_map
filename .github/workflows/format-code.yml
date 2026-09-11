@@ -2,9 +2,13 @@ name: Auto Format Code
 
 on:
   workflow_dispatch:
+  # Uncomment to run on every push
+  # push:
+  #   branches: [main, 'claude/**']
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   format:
@@ -36,18 +40,11 @@ jobs:
             echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Configure git
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: |
-          git config user.name "Claude Code"
-          git config user.email "noreply@anthropic.com"
-
       - name: Commit formatted code
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
+          git config user.name "Claude Code (Bot)"
+          git config user.email "noreply@anthropic.com"
           git add -A
-          git commit -m "style: Auto-format Dart code with dart format
-
-Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_0132QvsVndrjmTbkAcTaJNp6"
+          git commit -m "style: Auto-format Dart code with dart format"
           git push

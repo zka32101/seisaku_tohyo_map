@@ -198,10 +198,9 @@ class AppTheme {
           fontWeight: FontWeight.w700,
         ),
       ),
-      textTheme: GoogleFonts.notoSansJpTextTheme(base.textTheme).apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
-      ),
+      textTheme: GoogleFonts.notoSansJpTextTheme(
+        base.textTheme,
+      ).apply(bodyColor: Colors.white, displayColor: Colors.white),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,

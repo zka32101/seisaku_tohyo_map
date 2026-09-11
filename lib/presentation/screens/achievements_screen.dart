@@ -4,10 +4,7 @@ import 'package:nihon_future_map/infrastructure/providers/achievement_provider.d
 
 /// Achievements and gamification screen
 class AchievementsScreen extends ConsumerWidget {
-  const AchievementsScreen({
-    Key? key,
-    required this.userId,
-  }) : super(key: key);
+  const AchievementsScreen({Key? key, required this.userId}) : super(key: key);
 
   final String userId;
 
@@ -16,10 +13,7 @@ class AchievementsScreen extends ConsumerWidget {
     final achievementsAsync = ref.watch(achievementProvider(userId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('アチーブメント'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('アチーブメント'), centerTitle: true),
       body: achievementsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラー: $error')),
@@ -59,10 +53,7 @@ class AchievementsScreen extends ConsumerWidget {
           children: [
             Text(
               '進捗: ${achievements.achievementCount}/${allAchievements.length}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ClipRRect(
@@ -106,8 +97,9 @@ class AchievementsScreen extends ConsumerWidget {
       itemCount: allAchievements.length,
       itemBuilder: (context, index) {
         final achievement = allAchievements[index];
-        final isUnlocked =
-            achievements.unlockedAchievements.any((a) => a.id == achievement.id);
+        final isUnlocked = achievements.unlockedAchievements.any(
+          (a) => a.id == achievement.id,
+        );
 
         return _buildAchievementCard(achievement, isUnlocked);
       },
@@ -124,10 +116,7 @@ class AchievementsScreen extends ConsumerWidget {
           children: [
             Text(
               achievement.icon,
-              style: TextStyle(
-                fontSize: 40,
-                opacity: isUnlocked ? 1.0 : 0.3,
-              ),
+              style: TextStyle(fontSize: 40, opacity: isUnlocked ? 1.0 : 0.3),
             ),
             const SizedBox(height: 8),
             Text(

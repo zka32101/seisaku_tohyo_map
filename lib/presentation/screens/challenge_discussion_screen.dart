@@ -35,10 +35,7 @@ class _ChallengeDiscussionScreenState
     final discussionAsync = ref.watch(discussionProvider(widget.challengeId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ディスカッション'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('ディスカッション'), centerTitle: true),
       body: discussionAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラー: $error')),
@@ -68,9 +65,7 @@ class _ChallengeDiscussionScreenState
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Colors.grey.shade300),
-            ),
+            border: Border(top: BorderSide(color: Colors.grey.shade300)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -140,16 +135,11 @@ class _ChallengeDiscussionScreenState
               children: [
                 Text(
                   comment.userDisplayName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Text(
                   _formatDate(comment.createdAt),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ],
             ),
@@ -157,10 +147,7 @@ class _ChallengeDiscussionScreenState
             const SizedBox(height: 8),
 
             // Comment content
-            Text(
-              comment.content,
-              style: const TextStyle(fontSize: 13),
-            ),
+            Text(comment.content, style: const TextStyle(fontSize: 13)),
 
             const SizedBox(height: 8),
 
@@ -174,10 +161,7 @@ class _ChallengeDiscussionScreenState
                     _likeComment(comment.id);
                   },
                 ),
-                Text(
-                  '${comment.likes}',
-                  style: const TextStyle(fontSize: 12),
-                ),
+                Text('${comment.likes}', style: const TextStyle(fontSize: 12)),
               ],
             ),
           ],
@@ -188,17 +172,16 @@ class _ChallengeDiscussionScreenState
 
   Future<void> _submitComment() async {
     if (_commentController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('コメントを入力してください')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('コメントを入力してください')));
       return;
     }
 
     try {
-      final displayName =
-          _displayNameController.text.isNotEmpty
-              ? _displayNameController.text
-              : '匿名ユーザー';
+      final displayName = _displayNameController.text.isNotEmpty
+          ? _displayNameController.text
+          : '匿名ユーザー';
 
       await addDiscussionComment(
         challengeId: widget.challengeId,
@@ -213,13 +196,13 @@ class _ChallengeDiscussionScreenState
       // Refresh the discussion
       ref.refresh(discussionProvider(widget.challengeId));
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('コメントが送信されました')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('コメントが送信されました')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('エラー: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('エラー: $e')));
     }
   }
 
@@ -233,9 +216,9 @@ class _ChallengeDiscussionScreenState
       // Refresh the discussion
       ref.refresh(discussionProvider(widget.challengeId));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('エラー: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('エラー: $e')));
     }
   }
 

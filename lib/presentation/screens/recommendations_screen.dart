@@ -5,10 +5,8 @@ import 'package:nihon_future_map/infrastructure/providers/user_preferences_provi
 
 /// Personalized recommendations screen showing challenges matched to user interests
 class RecommendationsScreen extends ConsumerWidget {
-  const RecommendationsScreen({
-    Key? key,
-    required this.userId,
-  }) : super(key: key);
+  const RecommendationsScreen({Key? key, required this.userId})
+    : super(key: key);
 
   final String userId;
 
@@ -17,10 +15,7 @@ class RecommendationsScreen extends ConsumerWidget {
     final selectedInterests = ref.watch(selectedInterestsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('あなたへのおすすめ'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('あなたへのおすすめ'), centerTitle: true),
       body: selectedInterests.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラー: $error')),
@@ -54,13 +49,11 @@ class RecommendationsScreen extends ConsumerWidget {
     }
 
     final recommendationsAsync = ref.watch(
-      recommendationProvider(
-        (
-          userId: userId,
-          userInterests: interests,
-          limit: 20,
-        ),
-      ),
+      recommendationProvider((
+        userId: userId,
+        userInterests: interests,
+        limit: 20,
+      )),
     );
 
     return recommendationsAsync.when(
