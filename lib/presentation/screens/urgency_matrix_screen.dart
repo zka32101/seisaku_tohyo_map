@@ -5,6 +5,7 @@ import '../../application/providers/firebase_provider.dart';
 import '../../application/usecases/load_urgency_importance.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/urgency_importance.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import 'age_input_screen.dart';
 import 'challenge_detail_screen.dart';

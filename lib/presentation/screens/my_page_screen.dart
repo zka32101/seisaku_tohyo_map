@@ -6,6 +6,7 @@ import '../../application/providers/proposal_provider.dart';
 import '../../domain/entities/achievement.dart';
 import '../../domain/entities/activity_stats.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import 'about_screen.dart';
 import 'challenge_detail_screen.dart';
@@ -95,11 +96,9 @@ class MyPageScreen extends ConsumerWidget {
                       (c) => _MiniChallengeRow(
                         title: c.name,
                         category: c.category,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ChallengeDetailScreen(challenge: c),
-                          ),
+                        onTap: () => context.pushScreenWithTransition(
+                          ChallengeDetailScreen(challenge: c),
+                          screenName: 'ChallengeDetail',
                         ),
                       ),
                     )
@@ -120,8 +119,9 @@ class MyPageScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(AppRadius.badge),
             child: InkWell(
               borderRadius: BorderRadius.circular(AppRadius.badge),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              onTap: () => context.pushScreenWithTransition(
+                const AboutScreen(),
+                screenName: 'About',
               ),
               child: Container(
                 padding: const EdgeInsets.symmetric(

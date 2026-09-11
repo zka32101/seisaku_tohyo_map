@@ -7,6 +7,7 @@ import '../../application/usecases/load_agency_contacts.dart';
 import '../../domain/entities/challenge.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/achievement_unlock_dialog.dart';
 import '../widgets/glossary_text.dart';
@@ -46,10 +47,9 @@ class ChallengeListScreen extends ConsumerWidget {
             icon: const Icon(Icons.grid_view_outlined),
             tooltip: '全体を俯瞰する',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const OverviewMapScreen(),
-                ),
+              context.pushScreenWithTransition(
+                const OverviewMapScreen(),
+                screenName: 'OverviewMap',
               );
             },
           ),
@@ -57,8 +57,9 @@ class ChallengeListScreen extends ConsumerWidget {
             icon: const Icon(Icons.menu_book_outlined),
             tooltip: '用語集',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const GlossaryScreen()),
+              context.pushScreenWithTransition(
+                const GlossaryScreen(),
+                screenName: 'Glossary',
               );
             },
           ),
@@ -66,8 +67,9 @@ class ChallengeListScreen extends ConsumerWidget {
             icon: const Icon(Icons.leaderboard_outlined),
             tooltip: '週刊ランキング',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const RankingScreen()),
+              context.pushScreenWithTransition(
+                const RankingScreen(),
+                screenName: 'Ranking',
               );
             },
           ),
@@ -75,10 +77,9 @@ class ChallengeListScreen extends ConsumerWidget {
             icon: const Icon(Icons.campaign_outlined),
             tooltip: 'みんなの提案',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ProposalListScreen(),
-                ),
+              context.pushScreenWithTransition(
+                const ProposalListScreen(),
+                screenName: 'ProposalList',
               );
             },
           ),
@@ -113,10 +114,9 @@ class ChallengeListScreen extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(AppRadius.card),
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const GoodNewsScreen(),
-                      ),
+                    context.pushScreenWithTransition(
+                      const GoodNewsScreen(),
+                      screenName: 'GoodNews',
                     );
                   },
                   child: const Padding(
@@ -488,16 +488,15 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
         borderRadius: BorderRadius.circular(AppRadius.card),
         onTap: () {
           if (widget.challenge.id == 'my_pension_balance') {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const AgeInputScreen()),
+            context.pushScreenWithTransition(
+              const AgeInputScreen(),
+              screenName: 'AgeInput',
             );
             return;
           }
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  ChallengeDetailScreen(challenge: widget.challenge),
-            ),
+          context.pushScreenWithTransition(
+            ChallengeDetailScreen(challenge: widget.challenge),
+            screenName: 'ChallengeDetail',
           );
         },
         child: Container(

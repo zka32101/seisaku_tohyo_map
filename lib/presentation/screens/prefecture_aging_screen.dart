@@ -5,6 +5,7 @@ import '../../application/providers/firebase_provider.dart';
 import '../../application/usecases/load_prefecture_aging_stats.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/prefecture_aging_stat.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import 'challenge_detail_screen.dart';
 

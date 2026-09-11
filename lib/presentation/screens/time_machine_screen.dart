@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 import '../../application/providers/policy_simulation_provider.dart';
 import '../../domain/entities/policy_scenario.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/chart_axis.dart';
 import 'glossary_screen.dart';

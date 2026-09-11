@@ -25,6 +25,7 @@ import '../../domain/entities/issue_advocate.dart';
 import '../../domain/entities/policy_option.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/achievement_unlock_dialog.dart';
 import '../widgets/chart_axis.dart';
@@ -120,8 +121,9 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
             icon: const Icon(Icons.menu_book_outlined),
             tooltip: '用語集',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const GlossaryScreen()),
+              context.pushScreenWithTransition(
+                const GlossaryScreen(),
+                screenName: 'Glossary',
               );
             },
           ),
