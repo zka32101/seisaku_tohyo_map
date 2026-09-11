@@ -4,10 +4,7 @@ import 'package:nihon_future_map/infrastructure/providers/summary_provider.dart'
 
 /// Summary dashboard showing weekly and monthly voting summaries
 class SummaryScreen extends ConsumerWidget {
-  const SummaryScreen({
-    Key? key,
-    required this.userId,
-  }) : super(key: key);
+  const SummaryScreen({Key? key, required this.userId}) : super(key: key);
 
   final String userId;
 
@@ -92,10 +89,7 @@ class SummaryScreen extends ConsumerWidget {
           children: [
             Text(
               '${summary.weekStart.month}月${summary.weekStart.day}日 - ${summary.weekEnd.month}月${summary.weekEnd.day}日',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 12),
             Row(
@@ -183,17 +177,11 @@ class SummaryScreen extends ConsumerWidget {
   Widget _buildStatColumn(String label, String value) {
     return Column(
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -222,8 +210,10 @@ class SummaryScreen extends ConsumerWidget {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -259,8 +249,10 @@ class SummaryScreen extends ConsumerWidget {
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: summary.isConsistent
                         ? Colors.green.withOpacity(0.1)
@@ -272,7 +264,9 @@ class SummaryScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: summary.isConsistent ? Colors.green : Colors.orange,
+                      color: summary.isConsistent
+                          ? Colors.green
+                          : Colors.orange,
                     ),
                   ),
                 ),
@@ -440,8 +434,7 @@ class SummaryScreen extends ConsumerWidget {
                           summary.isGrowing
                               ? Icons.arrow_upward
                               : Icons.arrow_downward,
-                          color:
-                              summary.isGrowing ? Colors.green : Colors.red,
+                          color: summary.isGrowing ? Colors.green : Colors.red,
                           size: 20,
                         ),
                         Text(
@@ -449,8 +442,9 @@ class SummaryScreen extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color:
-                                summary.isGrowing ? Colors.green : Colors.red,
+                            color: summary.isGrowing
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                       ],
@@ -519,7 +513,9 @@ class SummaryScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(entry.key),
-                        Text('${entry.value}件 (${percentage.toStringAsFixed(0)}%)'),
+                        Text(
+                          '${entry.value}件 (${percentage.toStringAsFixed(0)}%)',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -609,10 +605,7 @@ class SummaryScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     '最も投票した分野: ${summary.dominantCategory}',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
               ),

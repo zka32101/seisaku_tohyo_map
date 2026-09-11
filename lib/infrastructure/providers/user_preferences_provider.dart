@@ -66,11 +66,10 @@ class SelectedInterestsNotifier
 }
 
 /// Riverpod provider for selected interests with automatic persistence
-final selectedInterestsProvider = StateNotifierProvider<
-    SelectedInterestsNotifier,
-    AsyncValue<List<String>>>(
-  (ref) => SelectedInterestsNotifier(),
-);
+final selectedInterestsProvider =
+    StateNotifierProvider<SelectedInterestsNotifier, AsyncValue<List<String>>>(
+      (ref) => SelectedInterestsNotifier(),
+    );
 
 /// State notifier for managing theme mode preference
 class ThemeModeNotifier extends StateNotifier<AsyncValue<String>> {
@@ -106,5 +105,5 @@ class ThemeModeNotifier extends StateNotifier<AsyncValue<String>> {
 /// Riverpod provider for theme mode preference with automatic persistence
 final themeModeProvider =
     StateNotifierProvider<ThemeModeNotifier, AsyncValue<String>>(
-  (ref) => ThemeModeNotifier(),
-);
+      (ref) => ThemeModeNotifier(),
+    );

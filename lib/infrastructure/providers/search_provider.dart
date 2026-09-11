@@ -27,8 +27,7 @@ class SearchResult {
       description: data['description'] ?? '',
       category: data['category'] ?? '',
       voteCount: data['vote_count'] ?? 0,
-      createdAt:
-          (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 }
@@ -47,8 +46,10 @@ class SearchParams {
 }
 
 /// Riverpod provider for search functionality
-final searchProvider = FutureProvider.family<List<SearchResult>, SearchParams>(
-    (ref, params) async {
+final searchProvider = FutureProvider.family<List<SearchResult>, SearchParams>((
+  ref,
+  params,
+) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
@@ -69,8 +70,8 @@ final searchProvider = FutureProvider.family<List<SearchResult>, SearchParams>(
     if (params.query.isNotEmpty) {
       final keywords = params.query.toLowerCase().split(' ');
       results = results.where((result) {
-        final searchText =
-            '${result.title} ${result.description}'.toLowerCase();
+        final searchText = '${result.title} ${result.description}'
+            .toLowerCase();
         return keywords.every((keyword) => searchText.contains(keyword));
       }).toList();
     }
@@ -86,7 +87,9 @@ final searchProvider = FutureProvider.family<List<SearchResult>, SearchParams>(
 
 /// Rank search results by specified criteria
 List<SearchResult> _rankByRelevance(
-    List<SearchResult> results, SearchParams params) {
+  List<SearchResult> results,
+  SearchParams params,
+) {
   switch (params.sortBy) {
     case 'newest':
       results.sort((a, b) => b.createdAt.compareTo(a.createdAt));

@@ -5,10 +5,7 @@ import 'package:nihon_future_map/infrastructure/providers/insights_provider.dart
 
 /// Advanced insights and political affinity analysis screen
 class InsightsScreen extends ConsumerWidget {
-  const InsightsScreen({
-    Key? key,
-    required this.userId,
-  }) : super(key: key);
+  const InsightsScreen({Key? key, required this.userId}) : super(key: key);
 
   final String userId;
 
@@ -17,10 +14,7 @@ class InsightsScreen extends ConsumerWidget {
     final insightsAsync = ref.watch(insightsProvider(userId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('インサイト'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('インサイト'), centerTitle: true),
       body: insightsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラー: $error')),
@@ -137,10 +131,7 @@ class InsightsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Text(
-              insight.icon,
-              style: const TextStyle(fontSize: 32),
-            ),
+            Text(insight.icon, style: const TextStyle(fontSize: 32)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -240,10 +231,7 @@ class InsightsScreen extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '保守的',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    const Text('保守的', style: TextStyle(fontSize: 12)),
                     Text(
                       '${affinity.conservativeScore.toStringAsFixed(0)}%',
                       style: const TextStyle(
@@ -266,8 +254,8 @@ class InsightsScreen extends ConsumerWidget {
                     affinity.dominantLeaning == 'conservative'
                         ? '保守的傾向'
                         : affinity.dominantLeaning == 'progressive'
-                            ? '進歩的傾向'
-                            : '中道的',
+                        ? '進歩的傾向'
+                        : '中道的',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -277,10 +265,7 @@ class InsightsScreen extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      '進歩的',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    const Text('進歩的', style: TextStyle(fontSize: 12)),
                     Text(
                       '${affinity.progressiveScore.toStringAsFixed(0)}%',
                       style: const TextStyle(

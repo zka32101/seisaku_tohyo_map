@@ -109,58 +109,58 @@ class UserAchievements {
 }
 
 /// Provider for user achievements
-final achievementProvider = FutureProvider.family<UserAchievements, String>(
-  (ref, userId) async {
-    final firestore = FirebaseFirestore.instance;
+final achievementProvider = FutureProvider.family<UserAchievements, String>((
+  ref,
+  userId,
+) async {
+  final firestore = FirebaseFirestore.instance;
 
-    try {
-      // Get user's vote data
-      final votesSnapshot = await firestore
-          .collection('users')
-          .doc(userId)
-          .collection('votes')
-          .get();
+  try {
+    // Get user's vote data
+    final votesSnapshot = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('votes')
+        .get();
 
-      final totalVotes = votesSnapshot.size;
-      final categories = <String>{};
+    final totalVotes = votesSnapshot.size;
+    final categories = <String>{};
 
-      for (final doc in votesSnapshot.docs) {
-        final category = doc['category'] as String?;
-        if (category != null) {
-          categories.add(category);
-        }
+    for (final doc in votesSnapshot.docs) {
+      final category = doc['category'] as String?;
+      if (category != null) {
+        categories.add(category);
       }
-
-      // Get unlocked achievements from Firestore
-      final achievementsSnapshot = await firestore
-          .collection('users')
-          .doc(userId)
-          .collection('achievements')
-          .get();
-
-      final unlockedIds =
-          achievementsSnapshot.docs.map((doc) => doc.id).toSet();
-
-      final unlockedAchievements = allAchievements
-          .where((achievement) => unlockedIds.contains(achievement.id))
-          .toList();
-
-      return UserAchievements(
-        userId: userId,
-        unlockedAchievements: unlockedAchievements,
-        totalVotes: totalVotes,
-        votedCategories: categories,
-      );
-    } catch (e) {
-      return UserAchievements(
-        userId: userId,
-        unlockedAchievements: [],
-        totalVotes: 0,
-        votedCategories: {},
-      );
     }
-  },
-);
+
+    // Get unlocked achievements from Firestore
+    final achievementsSnapshot = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('achievements')
+        .get();
+
+    final unlockedIds = achievementsSnapshot.docs.map((doc) => doc.id).toSet();
+
+    final unlockedAchievements = allAchievements
+        .where((achievement) => unlockedIds.contains(achievement.id))
+        .toList();
+
+    return UserAchievements(
+      userId: userId,
+      unlockedAchievements: unlockedAchievements,
+      totalVotes: totalVotes,
+      votedCategories: categories,
+    );
+  } catch (e) {
+    return UserAchievements(
+      userId: userId,
+      unlockedAchievements: [],
+      totalVotes: 0,
+      votedCategories: {},
+    );
+  }
+});
 
 /// Check and unlock achievements based on user actions
 Future<void> checkAndUnlockAchievements(

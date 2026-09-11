@@ -29,8 +29,7 @@ class DiscussionComment {
       userDisplayName: data['user_display_name'] ?? '匿名ユーザー',
       content: data['content'] ?? '',
       likes: data['likes'] ?? 0,
-      createdAt:
-          (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
       replies: (data['replies'] as List?)?.cast<String>(),
     );
   }
@@ -52,8 +51,10 @@ class ChallengeDiscussion {
 }
 
 /// Provider for challenge discussion
-final discussionProvider = FutureProvider.family<ChallengeDiscussion, String>(
-    (ref, challengeId) async {
+final discussionProvider = FutureProvider.family<ChallengeDiscussion, String>((
+  ref,
+  challengeId,
+) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
@@ -104,13 +105,13 @@ Future<void> addDiscussionComment({
         .doc(challengeId)
         .collection('discussions')
         .add({
-      'user_id': userId,
-      'user_display_name': displayName,
-      'content': content,
-      'likes': 0,
-      'created_at': FieldValue.serverTimestamp(),
-      'updated_at': FieldValue.serverTimestamp(),
-    });
+          'user_id': userId,
+          'user_display_name': displayName,
+          'content': content,
+          'likes': 0,
+          'created_at': FieldValue.serverTimestamp(),
+          'updated_at': FieldValue.serverTimestamp(),
+        });
   } catch (e) {
     rethrow;
   }
@@ -129,9 +130,7 @@ Future<void> likeDiscussionComment({
         .doc(challengeId)
         .collection('discussions')
         .doc(commentId)
-        .update({
-      'likes': FieldValue.increment(1),
-    });
+        .update({'likes': FieldValue.increment(1)});
   } catch (e) {
     rethrow;
   }

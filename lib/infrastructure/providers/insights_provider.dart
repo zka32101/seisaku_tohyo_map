@@ -55,8 +55,10 @@ class UserInsights {
 }
 
 /// Provider for user insights and analytics
-final insightsProvider =
-    FutureProvider.family<UserInsights, String>((ref, userId) async {
+final insightsProvider = FutureProvider.family<UserInsights, String>((
+  ref,
+  userId,
+) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
@@ -98,65 +100,72 @@ final insightsProvider =
         .reduce((a, b) => a.value > b.value ? a : b)
         .key;
 
-    insights.add(VotingInsight(
-      title: 'よく投票する分野',
-      description: '$preferredCategory に最も多く投票しています',
-      icon: '📊',
-      value: categoryVotes[preferredCategory]?.toDouble() ?? 0,
-      unit: '件',
-      comparison: 'higher',
-    ));
+    insights.add(
+      VotingInsight(
+        title: 'よく投票する分野',
+        description: '$preferredCategory に最も多く投票しています',
+        icon: '📊',
+        value: categoryVotes[preferredCategory]?.toDouble() ?? 0,
+        unit: '件',
+        comparison: 'higher',
+      ),
+    );
 
     // 2. Voting consistency (days between votes)
     double avgDaysBetweenVotes = 0;
     if (voteTimestamps.length > 1) {
       int totalDays = 0;
       for (int i = 0; i < voteTimestamps.length - 1; i++) {
-        totalDays +=
-            voteTimestamps[i].difference(voteTimestamps[i + 1]).inDays;
+        totalDays += voteTimestamps[i].difference(voteTimestamps[i + 1]).inDays;
       }
       avgDaysBetweenVotes = totalDays / (voteTimestamps.length - 1);
     }
 
     final votingConsistency = (100 / (avgDaysBetweenVotes + 1)).clamp(0, 100);
 
-    insights.add(VotingInsight(
-      title: '投票の一貫性',
-      description:
-          '投票パターンが${votingConsistency > 70 ? '非常に' : ''}安定しています',
-      icon: '⏰',
-      value: votingConsistency,
-      unit: '%',
-      comparison: votingConsistency > 70 ? 'higher' : 'average',
-    ));
+    insights.add(
+      VotingInsight(
+        title: '投票の一貫性',
+        description: '投票パターンが${votingConsistency > 70 ? '非常に' : ''}安定しています',
+        icon: '⏰',
+        value: votingConsistency,
+        unit: '%',
+        comparison: votingConsistency > 70 ? 'higher' : 'average',
+      ),
+    );
 
     // 3. Category diversity
     final categoryDiversity = (categoryVotes.length / 8) * 100;
-    insights.add(VotingInsight(
-      title: '分野の多様性',
-      description: '${categoryVotes.length}個の分野に投票しています',
-      icon: '🎯',
-      value: categoryDiversity,
-      unit: '%',
-      comparison: categoryDiversity > 50 ? 'higher' : 'lower',
-    ));
+    insights.add(
+      VotingInsight(
+        title: '分野の多様性',
+        description: '${categoryVotes.length}個の分野に投票しています',
+        icon: '🎯',
+        value: categoryDiversity,
+        unit: '%',
+        comparison: categoryDiversity > 50 ? 'higher' : 'lower',
+      ),
+    );
 
     // 4. Prediction for next vote
     final lastVoteDate = voteTimestamps.isNotEmpty
         ? voteTimestamps[0]
         : DateTime.now();
     final daysSinceLastVote = DateTime.now().difference(lastVoteDate).inDays;
-    final predictedDaysUntilNextVote =
-        (avgDaysBetweenVotes - daysSinceLastVote).toInt().clamp(0, 365);
+    final predictedDaysUntilNextVote = (avgDaysBetweenVotes - daysSinceLastVote)
+        .toInt()
+        .clamp(0, 365);
 
-    insights.add(VotingInsight(
-      title: '次の投票予測',
-      description: 'パターンから約${predictedDaysUntilNextVote}日後に投票する可能性があります',
-      icon: '🔮',
-      value: predictedDaysUntilNextVote.toDouble(),
-      unit: '日',
-      comparison: 'average',
-    ));
+    insights.add(
+      VotingInsight(
+        title: '次の投票予測',
+        description: 'パターンから約${predictedDaysUntilNextVote}日後に投票する可能性があります',
+        icon: '🔮',
+        value: predictedDaysUntilNextVote.toDouble(),
+        unit: '日',
+        comparison: 'average',
+      ),
+    );
 
     // Calculate political affinity (simplified)
     // In a real implementation, this would analyze the specific positions in each vote

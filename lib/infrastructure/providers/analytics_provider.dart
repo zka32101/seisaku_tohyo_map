@@ -38,8 +38,10 @@ class InterestTrend {
 }
 
 /// Riverpod provider for user analytics
-final analyticsProvider =
-    FutureProvider.family<UserAnalytics, String>((ref, userId) async {
+final analyticsProvider = FutureProvider.family<UserAnalytics, String>((
+  ref,
+  userId,
+) async {
   final firestore = FirebaseFirestore.instance;
 
   try {

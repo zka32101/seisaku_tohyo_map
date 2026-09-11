@@ -14,10 +14,7 @@ class MyAnalyticsScreen extends ConsumerWidget {
     final analyticsAsync = ref.watch(analyticsProvider(userId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('マイ分析'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('マイ分析'), centerTitle: true),
       body: analyticsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラー: $error')),
@@ -59,9 +56,7 @@ class MyAnalyticsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             if (categoryCounts.isEmpty)
-              const Center(
-                child: Text('投票データがありません'),
-              )
+              const Center(child: Text('投票データがありません'))
             else
               SizedBox(
                 height: 200,
@@ -116,7 +111,9 @@ class MyAnalyticsScreen extends ConsumerWidget {
                         Text(trend.category),
                         Row(
                           children: [
-                            Text('${trend.lastMonthCount} → ${trend.thisMonthCount}'),
+                            Text(
+                              '${trend.lastMonthCount} → ${trend.thisMonthCount}',
+                            ),
                             const SizedBox(width: 8),
                             Icon(
                               isPositive
@@ -204,11 +201,7 @@ class MyAnalyticsScreen extends ConsumerWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            final labels = [
-                              '2月前',
-                              '1月前',
-                              '今月',
-                            ];
+                            final labels = ['2月前', '1月前', '今月'];
                             final index = value.toInt();
                             return Text(
                               index < labels.length ? labels[index] : '',
@@ -232,8 +225,7 @@ class MyAnalyticsScreen extends ConsumerWidget {
                           ),
                           FlSpot(
                             2,
-                            (monthlyVoteCounts['this_month'] ?? 0)
-                                .toDouble(),
+                            (monthlyVoteCounts['this_month'] ?? 0).toDouble(),
                           ),
                         ],
                         isCurved: true,

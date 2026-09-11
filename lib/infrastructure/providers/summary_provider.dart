@@ -69,8 +69,10 @@ class MonthlySummary {
 }
 
 /// Provider for weekly summary
-final weeklySummaryProvider =
-    FutureProvider.family<WeeklySummary, String>((ref, userId) async {
+final weeklySummaryProvider = FutureProvider.family<WeeklySummary, String>((
+  ref,
+  userId,
+) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
@@ -85,8 +87,10 @@ final weeklySummaryProvider =
         .collection('users')
         .doc(userId)
         .collection('votes')
-        .where('created_at',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(weekStart))
+        .where(
+          'created_at',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(weekStart),
+        )
         .where('created_at', isLessThanOrEqualTo: Timestamp.fromDate(weekEnd))
         .get();
 
@@ -95,10 +99,14 @@ final weeklySummaryProvider =
         .collection('users')
         .doc(userId)
         .collection('votes')
-        .where('created_at',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(lastWeekStart))
-        .where('created_at',
-            isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd))
+        .where(
+          'created_at',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(lastWeekStart),
+        )
+        .where(
+          'created_at',
+          isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd),
+        )
         .get();
 
     // Analyze this week's votes
@@ -131,7 +139,8 @@ final weeklySummaryProvider =
     // Calculate consistency score
     final dailyVotes = <int, int>{};
     for (final doc in thisWeekSnapshot.docs) {
-      final date = (doc['created_at'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final date =
+          (doc['created_at'] as Timestamp?)?.toDate() ?? DateTime.now();
       final dayOfWeek = date.weekday;
       dailyVotes.update(dayOfWeek, (v) => v + 1, ifAbsent: () => 1);
     }
@@ -170,29 +179,41 @@ final weeklySummaryProvider =
 });
 
 /// Provider for monthly summary
-final monthlySummaryProvider =
-    FutureProvider.family<MonthlySummary, String>((ref, userId) async {
+final monthlySummaryProvider = FutureProvider.family<MonthlySummary, String>((
+  ref,
+  userId,
+) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
     final now = DateTime.now();
     final thisMonthStart = DateTime(now.year, now.month, 1);
-    final thisMonthEnd =
-        DateTime(now.year, now.month + 1, 1).subtract(const Duration(days: 1));
+    final thisMonthEnd = DateTime(
+      now.year,
+      now.month + 1,
+      1,
+    ).subtract(const Duration(days: 1));
 
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
-    final lastMonthEnd =
-        DateTime(now.year, now.month, 1).subtract(const Duration(days: 1));
+    final lastMonthEnd = DateTime(
+      now.year,
+      now.month,
+      1,
+    ).subtract(const Duration(days: 1));
 
     // Get this month's votes
     final thisMonthSnapshot = await firestore
         .collection('users')
         .doc(userId)
         .collection('votes')
-        .where('created_at',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(thisMonthStart))
-        .where('created_at',
-            isLessThanOrEqualTo: Timestamp.fromDate(thisMonthEnd))
+        .where(
+          'created_at',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(thisMonthStart),
+        )
+        .where(
+          'created_at',
+          isLessThanOrEqualTo: Timestamp.fromDate(thisMonthEnd),
+        )
         .get();
 
     // Get last month's votes
@@ -200,10 +221,14 @@ final monthlySummaryProvider =
         .collection('users')
         .doc(userId)
         .collection('votes')
-        .where('created_at',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(lastMonthStart))
-        .where('created_at',
-            isLessThanOrEqualTo: Timestamp.fromDate(lastMonthEnd))
+        .where(
+          'created_at',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(lastMonthStart),
+        )
+        .where(
+          'created_at',
+          isLessThanOrEqualTo: Timestamp.fromDate(lastMonthEnd),
+        )
         .get();
 
     // Analyze category breakdown

@@ -32,8 +32,7 @@ final trendingProvider = FutureProvider<List<TrendingItem>>((ref) async {
     final lastWeekEnd = thisWeekStart.subtract(const Duration(days: 1));
 
     // Get all challenges
-    final challengesSnapshot =
-        await firestore.collection('challenges').get();
+    final challengesSnapshot = await firestore.collection('challenges').get();
 
     final trendingItems = <TrendingItem>[];
 
@@ -49,8 +48,10 @@ final trendingProvider = FutureProvider<List<TrendingItem>>((ref) async {
           .collection('challenges')
           .doc(challengeId)
           .collection('votes')
-          .where('created_at',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(thisWeekStart))
+          .where(
+            'created_at',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(thisWeekStart),
+          )
           .count()
           .get();
       final thisWeekVotes = thisWeekSnapshot.count;
@@ -60,10 +61,14 @@ final trendingProvider = FutureProvider<List<TrendingItem>>((ref) async {
           .collection('challenges')
           .doc(challengeId)
           .collection('votes')
-          .where('created_at',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(lastWeekStart))
-          .where('created_at',
-              isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd))
+          .where(
+            'created_at',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(lastWeekStart),
+          )
+          .where(
+            'created_at',
+            isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd),
+          )
           .count()
           .get();
       final lastWeekVotes = lastWeekSnapshot.count;
