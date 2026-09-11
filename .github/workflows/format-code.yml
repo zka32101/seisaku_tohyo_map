@@ -1,0 +1,53 @@
+name: Auto Format Code
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    name: Format Dart Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Format code
+        run: dart format .
+
+      - name: Check if changes were made
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure git
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config user.name "Claude Code"
+          git config user.email "noreply@anthropic.com"
+
+      - name: Commit formatted code
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git add -A
+          git commit -m "style: Auto-format Dart code with dart format
+
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0132QvsVndrjmTbkAcTaJNp6"
+          git push
