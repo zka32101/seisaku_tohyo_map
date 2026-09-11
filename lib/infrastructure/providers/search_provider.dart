@@ -27,7 +27,8 @@ class SearchResult {
       description: data['description'] ?? '',
       category: data['category'] ?? '',
       voteCount: data['vote_count'] ?? 0,
-      createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt:
+          (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 }
@@ -46,8 +47,8 @@ class SearchParams {
 }
 
 /// Riverpod provider for search functionality
-final searchProvider =
-    FutureProvider.family<List<SearchResult>, SearchParams>((ref, params) async {
+final searchProvider = FutureProvider.family<List<SearchResult>, SearchParams>(
+    (ref, params) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
@@ -84,7 +85,8 @@ final searchProvider =
 });
 
 /// Rank search results by specified criteria
-List<SearchResult> _rankByRelevance(List<SearchResult> results, SearchParams params) {
+List<SearchResult> _rankByRelevance(
+    List<SearchResult> results, SearchParams params) {
   switch (params.sortBy) {
     case 'newest':
       results.sort((a, b) => b.createdAt.compareTo(a.createdAt));

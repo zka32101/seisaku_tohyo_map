@@ -29,7 +29,8 @@ class DiscussionComment {
       userDisplayName: data['user_display_name'] ?? '匿名ユーザー',
       content: data['content'] ?? '',
       likes: data['likes'] ?? 0,
-      createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt:
+          (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
       replies: (data['replies'] as List?)?.cast<String>(),
     );
   }
@@ -51,8 +52,8 @@ class ChallengeDiscussion {
 }
 
 /// Provider for challenge discussion
-final discussionProvider =
-    FutureProvider.family<ChallengeDiscussion, String>((ref, challengeId) async {
+final discussionProvider = FutureProvider.family<ChallengeDiscussion, String>(
+    (ref, challengeId) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
