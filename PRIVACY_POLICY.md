@@ -1,83 +1,102 @@
-# プライバシーポリシー（政策投票マップ）
+# 政策投票マップ プライバシーポリシー
+# Privacy Policy - Policy Voting Map
 
-最終更新日: 2026年7月13日
+**Effective Date**: September 2026  
+**Last Updated**: September 11, 2026  
 
-Petit Works Apps（以下「当方」）は、アプリ「政策投票マップ」（以下「本アプリ」）における
-利用者の情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。
+---
 
-## 1. 収集する情報
+## English Version
 
-本アプリは、氏名・メールアドレス・電話番号・住所などの**個人を特定できる情報を収集しません**。
-本アプリの利用にあたり、アカウント登録（会員登録）は不要です。
+### Introduction
 
-本アプリが収集する情報は以下のとおりです。
+Policy Voting Map ("we," "us," "our," or "Company") operates the Policy Voting Map application (the "App"). This Privacy Policy explains our practices regarding the collection, use, and protection of your personal information.
 
-### 1-1. 匿名の識別情報
-Firebase Authenticationの匿名認証機能により、端末ごとに一意のランダムなID（UID）を発行します。
-このIDは個人を特定するものではなく、投票の重複防止やコメントの紐付けにのみ利用します。
+### 1. Information We Collect
 
-### 1-2. 利用状況・分析データ
-Firebase Analyticsを通じて、以下のような匿名の利用統計を収集します。
-- 画面の閲覧状況、機能の利用回数（投票・コメント投稿・クイズ回答など）
-- 端末の種類、OSバージョン、アプリのバージョン
-- おおよその地域（国・都道府県レベル）
+#### a) Information You Provide
+- **User Account Information**: Display name, email address (optional), password hash
+- **Voting Data**: Your votes on policy proposals, voting timestamps
+- **Comments & Discussion**: User-generated content in discussion threads
+- **Preferences**: Selected interest categories, theme preferences
 
-これらは個人を特定しない形で集計され、アプリの改善のためにのみ利用します。
+#### b) Automatically Collected Information
+- **Device Information**: Device model, OS version, unique device identifiers
+- **Usage Analytics**: App features used, session duration, crash reports
+- **Approximate Location**: Country/region based on IP address
+- **Firebase Analytics**: User behavior patterns, feature usage, conversion metrics
 
-### 1-3. ユーザーが投稿する情報
-「みんなの声」機能で投稿するコメント、および「みんなの提案」機能で投稿する課題提案の
-テキストは、Cloud Firestore（Googleのデータベースサービス）に保存され、他の利用者に
-公開されます。**個人情報を含む内容を投稿しないようご注意ください。**
+#### c) Third-Party Services
+- **Google Firebase**: Analytics, Crashlytics, Cloud Firestore
+  - [Firebase Privacy Policy](https://firebase.google.com/support/privacy)
+- **App Store Connect**: App review and crash reports
 
-### 1-4. プッシュ通知トークン
-プッシュ通知を許可した場合、Firebase Cloud Messagingが発行する通知用トークンを
-サーバー側で保持します。このトークンは通知の送信のみに利用します。
+### 2. How We Use Your Information
 
-### 1-5. 購入情報（寄付機能）
-アプリ内課金（寄付機能）をご利用の場合、決済処理はApple（App Store）または
-Google（Google Play）が行い、クレジットカード番号等の決済情報を当方が保持することは
-ありません。当方が把握するのは「購入が完了したこと」のみです。
+We use collected information to:
 
-### 1-6. 端末内に保存される情報
-投票履歴、獲得した実績バッジ、年金診断の実施履歴などは、Hive（ローカルストレージ）を
-用いて**端末内にのみ**保存されます。これらの情報は当方のサーバーには送信されません。
+1. **Provide & Improve Services**
+   - Deliver voting and analytics features
+   - Personalize recommendations based on your interests
+   - Improve app performance and user experience
 
-## 2. 情報の利用目的
+2. **Analytics & Research**
+   - Understand user behavior patterns
+   - Measure feature effectiveness
+   - Identify popular policy areas
 
-収集した情報は、以下の目的にのみ利用します。
-- 本アプリの機能提供（投票の重複防止、コメント・提案の表示、実績の記録等）
-- 本アプリの利用状況の分析、不具合の把握、機能改善
-- プッシュ通知の配信（許可した場合のみ）
+3. **Safety & Security**
+   - Detect and prevent fraud
+   - Monitor for security threats
+   - Enforce our Terms of Service
 
-## 3. 第三者への提供
+4. **Communication**
+   - Send technical updates and security notices
+   - Respond to user support requests
 
-当方は、以下の場合を除き、収集した情報を第三者に提供しません。
-- 利用者の同意がある場合
-- 法令に基づき開示が求められた場合
+### 3. Data Retention
 
-なお、本アプリは以下の外部サービスを利用しており、各サービスのプライバシーポリシーが
-適用されます。
-- Firebase（Google LLC）: https://firebase.google.com/support/privacy
-- Google Analytics for Firebase
+- **Voting Data**: Retained indefinitely (core feature)
+- **Comments**: Retained as long as account is active
+- **Analytics Data**: Retained for 26 months (Firebase default)
+- **Crash Reports**: Retained for investigation and debugging
+- **After Account Deletion**: Data anonymized or deleted within 30 days
 
-## 4. 広告について
+### 4. Data Sharing & Third Parties
 
-本アプリは広告を表示しません。
+We **do not sell** user data.
 
-## 5. データの削除
+We share data only with:
 
-匿名認証のIDに紐づくローカルデータ（投票履歴・実績等）は、アプリをアンインストールすると
-端末から削除されます。投稿したコメント・提案の削除をご希望の場合は、下記のお問い合わせ先
-までご連絡ください。
+1. **Google Firebase Services**
+   - Analytics aggregation
+   - Crash reporting
+   - Firestore database backend
 
-## 6. お問い合わせ
+2. **Apple App Store**
+   - App Store Connect for app review
+   - Crash report sharing
 
-本ポリシーに関するお問い合わせは、以下までご連絡ください。
+3. **Legal Requirements**
+   - If required by law, court order, or government request
+   - To protect safety, rights, or property
 
-- 運営者: Petit Works Apps
-- メールアドレス: petitworksdev@gmail.com
+### 5. Data Security
 
-## 7. 本ポリシーの変更
+**Security Measures:**
+- ✅ HTTPS encryption for all data transmission
+- ✅ Firebase security rules restrict data access
+- ✅ No passwords stored (authentication via Firebase)
+- ✅ Regular security updates
+- ✅ No third-party advertising networks
 
-本ポリシーの内容は、法令の改正やサービス内容の変更に応じて予告なく変更することがあります。
-変更後のプライバシーポリシーは、本アプリ内またはこのページに掲載した時点で効力を生じるものとします。
+### 6. User Rights & Data Control
+
+You have the right to access, correct, and delete your data. Contact privacy@nihon-future-map.jp for requests.
+
+### 7. Contact Us
+
+**Privacy Questions:**
+Email: privacy@nihon-future-map.jp
+
+**Last Updated**: September 11, 2026
