@@ -122,7 +122,8 @@ final insightsProvider =
 
     insights.add(VotingInsight(
       title: '投票の一貫性',
-      description: '投票パターンが${votingConsistency > 70 ? '非常に' : ''}安定しています',
+      description:
+          '投票パターンが${votingConsistency > 70 ? '非常に' : ''}安定しています',
       icon: '⏰',
       value: votingConsistency,
       unit: '%',
@@ -141,7 +142,9 @@ final insightsProvider =
     ));
 
     // 4. Prediction for next vote
-    final lastVoteDate = voteTimestamps.isNotEmpty ? voteTimestamps[0] : DateTime.now();
+    final lastVoteDate = voteTimestamps.isNotEmpty
+        ? voteTimestamps[0]
+        : DateTime.now();
     final daysSinceLastVote = DateTime.now().difference(lastVoteDate).inDays;
     final predictedDaysUntilNextVote =
         (avgDaysBetweenVotes - daysSinceLastVote).toInt().clamp(0, 365);

@@ -84,7 +84,8 @@ final recommendationProvider = FutureProvider.family<
       // 1. Category match (primary interest)
       // 2. Vote count (popularity)
       // 3. Recency (created_at)
-      final categoryWeight = _getCategoryRelevance(category, params.userInterests);
+      final categoryWeight =
+          _getCategoryRelevance(category, params.userInterests);
       final createdAt =
           (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now();
       final daysSinceCreated = DateTime.now().difference(createdAt).inDays;
