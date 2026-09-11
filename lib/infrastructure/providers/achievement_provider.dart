@@ -138,7 +138,8 @@ final achievementProvider = FutureProvider.family<UserAchievements, String>(
           .collection('achievements')
           .get();
 
-      final unlockedIds = achievementsSnapshot.docs.map((doc) => doc.id).toSet();
+      final unlockedIds =
+          achievementsSnapshot.docs.map((doc) => doc.id).toSet();
 
       final unlockedAchievements = allAchievements
           .where((achievement) => unlockedIds.contains(achievement.id))
@@ -167,7 +168,10 @@ Future<void> checkAndUnlockAchievements(
   Map<String, dynamic> updateData,
 ) async {
   final firestore = FirebaseFirestore.instance;
-  final achievementsRef = firestore.collection('users').doc(userId).collection('achievements');
+  final achievementsRef = firestore
+      .collection('users')
+      .doc(userId)
+      .collection('achievements');
 
   final totalVotes = updateData['total_votes'] as int? ?? 0;
   final categories = (updateData['categories'] as List?)?.cast<String>() ?? [];

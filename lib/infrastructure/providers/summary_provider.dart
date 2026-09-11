@@ -85,7 +85,8 @@ final weeklySummaryProvider =
         .collection('users')
         .doc(userId)
         .collection('votes')
-        .where('created_at', isGreaterThanOrEqualTo: Timestamp.fromDate(weekStart))
+        .where('created_at',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(weekStart))
         .where('created_at', isLessThanOrEqualTo: Timestamp.fromDate(weekEnd))
         .get();
 
@@ -96,7 +97,8 @@ final weeklySummaryProvider =
         .collection('votes')
         .where('created_at',
             isGreaterThanOrEqualTo: Timestamp.fromDate(lastWeekStart))
-        .where('created_at', isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd))
+        .where('created_at',
+            isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd))
         .get();
 
     // Analyze this week's votes
@@ -189,7 +191,8 @@ final monthlySummaryProvider =
         .collection('votes')
         .where('created_at',
             isGreaterThanOrEqualTo: Timestamp.fromDate(thisMonthStart))
-        .where('created_at', isLessThanOrEqualTo: Timestamp.fromDate(thisMonthEnd))
+        .where('created_at',
+            isLessThanOrEqualTo: Timestamp.fromDate(thisMonthEnd))
         .get();
 
     // Get last month's votes
@@ -199,7 +202,8 @@ final monthlySummaryProvider =
         .collection('votes')
         .where('created_at',
             isGreaterThanOrEqualTo: Timestamp.fromDate(lastMonthStart))
-        .where('created_at', isLessThanOrEqualTo: Timestamp.fromDate(lastMonthEnd))
+        .where('created_at',
+            isLessThanOrEqualTo: Timestamp.fromDate(lastMonthEnd))
         .get();
 
     // Analyze category breakdown

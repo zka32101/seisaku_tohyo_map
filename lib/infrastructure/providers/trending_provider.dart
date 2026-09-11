@@ -60,8 +60,10 @@ final trendingProvider = FutureProvider<List<TrendingItem>>((ref) async {
           .collection('challenges')
           .doc(challengeId)
           .collection('votes')
-          .where('created_at', isGreaterThanOrEqualTo: Timestamp.fromDate(lastWeekStart))
-          .where('created_at', isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd))
+          .where('created_at',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(lastWeekStart))
+          .where('created_at',
+              isLessThanOrEqualTo: Timestamp.fromDate(lastWeekEnd))
           .count()
           .get();
       final lastWeekVotes = lastWeekSnapshot.count;
