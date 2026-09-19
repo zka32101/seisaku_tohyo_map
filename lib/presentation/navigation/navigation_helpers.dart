@@ -5,27 +5,26 @@ class SlideRightTransition extends PageRouteBuilder {
   final Widget page;
   final String screenName;
 
-  SlideRightTransition({
-    required this.page,
-    this.screenName = '',
-  }) : super(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(1.0, 0.0);
-      const end = Offset.zero;
-      const curve = Curves.easeInOut;
+  SlideRightTransition({required this.page, this.screenName = ''})
+    : super(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
 
-      var tween = Tween(begin: begin, end: end).chain(
-        CurveTween(curve: curve),
-      );
+          var tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
 
-      return SlideTransition(
-        position: animation.drive(tween),
-        child: child,
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
       );
-    },
-    transitionDuration: const Duration(milliseconds: 300),
-  );
 }
 
 /// Navigation context for providing screen hierarchy information
@@ -50,12 +49,9 @@ extension NavigationExtension on BuildContext {
     Widget screen, {
     String screenName = '',
   }) {
-    return Navigator.of(this).push<T>(
-      SlideRightTransition(
-        page: screen,
-        screenName: screenName,
-      ),
-    );
+    return Navigator.of(
+      this,
+    ).push<T>(SlideRightTransition(page: screen, screenName: screenName));
   }
 
   /// Push replacement with transition
@@ -64,10 +60,7 @@ extension NavigationExtension on BuildContext {
     String screenName = '',
   }) {
     return Navigator.of(this).pushReplacement<T, T>(
-      SlideRightTransition(
-        page: screen,
-        screenName: screenName,
-      ),
+      SlideRightTransition(page: screen, screenName: screenName),
     );
   }
 
@@ -112,9 +105,7 @@ const screenTitleMap = {
 
 /// Build a breadcrumb string for navigation context
 String buildBreadcrumb(List<String> screens) {
-  return screens
-      .map((s) => screenTitleMap[s] ?? s)
-      .join(' > ');
+  return screens.map((s) => screenTitleMap[s] ?? s).join(' > ');
 }
 
 /// AppBar builder with navigation context support
@@ -128,10 +119,7 @@ AppBar buildContextAwareAppBar({
   final title = screenTitleMap[screenName] ?? screenName;
 
   return AppBar(
-    title: Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge,
-    ),
+    title: Text(title, style: Theme.of(context).textTheme.titleLarge),
     automaticallyImplyLeading: showBackButton && Navigator.of(context).canPop(),
     leading: showBackButton && Navigator.of(context).canPop()
         ? IconButton(

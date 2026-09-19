@@ -322,11 +322,7 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
                 title: '所得層',
                 entries: DemographicRelevance.incomeRelevance(challenge),
                 order: const ['low', 'mid', 'high'],
-                labels: const {
-                  'low': '低所得層',
-                  'mid': '中所得層',
-                  'high': '高所得層',
-                },
+                labels: const {'low': '低所得層', 'mid': '中所得層', 'high': '高所得層'},
                 color: color,
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -584,10 +580,7 @@ class _RelevanceBarChart extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 1,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(AppRadius.badge),
