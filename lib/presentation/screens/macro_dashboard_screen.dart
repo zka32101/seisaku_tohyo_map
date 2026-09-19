@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import '../../application/providers/dashboard_provider.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/chart_axis.dart';
 import '../widgets/offline_banner.dart';
@@ -31,8 +32,9 @@ class MacroDashboardScreen extends ConsumerWidget {
             icon: const Icon(Icons.person_outline),
             tooltip: 'マイページ',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const MyPageScreen()),
+              context.pushScreenWithTransition(
+                const MyPageScreen(),
+                screenName: 'MyPage',
               );
             },
           ),
@@ -40,8 +42,9 @@ class MacroDashboardScreen extends ConsumerWidget {
             icon: const Icon(Icons.volunteer_activism_outlined),
             tooltip: '応援する（寄付）',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const DonationScreen()),
+              context.pushScreenWithTransition(
+                const DonationScreen(),
+                screenName: 'Donation',
               );
             },
           ),
@@ -49,8 +52,9 @@ class MacroDashboardScreen extends ConsumerWidget {
             icon: const Icon(Icons.menu_book_outlined),
             tooltip: '用語集',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const GlossaryScreen()),
+              context.pushScreenWithTransition(
+                const GlossaryScreen(),
+                screenName: 'Glossary',
               );
             },
           ),
@@ -182,10 +186,9 @@ class MacroDashboardScreen extends ConsumerWidget {
 
               OutlinedButton.icon(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const TimeMachineScreen(),
-                    ),
+                  context.pushScreenWithTransition(
+                    const TimeMachineScreen(),
+                    screenName: 'TimeMachine',
                   );
                 },
                 icon: const Icon(Icons.access_time, size: 18),
@@ -198,10 +201,9 @@ class MacroDashboardScreen extends ConsumerWidget {
 
               OutlinedButton.icon(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const UrgencyMatrixScreen(),
-                    ),
+                  context.pushScreenWithTransition(
+                    const UrgencyMatrixScreen(),
+                    screenName: 'UrgencyMatrix',
                   );
                 },
                 icon: const Icon(Icons.grid_view, size: 18),
@@ -214,10 +216,9 @@ class MacroDashboardScreen extends ConsumerWidget {
 
               OutlinedButton.icon(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const PrefectureAgingScreen(),
-                    ),
+                  context.pushScreenWithTransition(
+                    const PrefectureAgingScreen(),
+                    screenName: 'PrefectureAging',
                   );
                 },
                 icon: const Icon(Icons.map_outlined, size: 18),
@@ -452,10 +453,9 @@ class MacroDashboardScreen extends ConsumerWidget {
 
               OutlinedButton.icon(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const RankingScreen(),
-                    ),
+                  context.pushScreenWithTransition(
+                    const RankingScreen(),
+                    screenName: 'Ranking',
                   );
                 },
                 icon: const Icon(Icons.leaderboard, size: 18),
@@ -472,10 +472,9 @@ class MacroDashboardScreen extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(AppRadius.card),
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const QuizScreen(),
-                      ),
+                    context.pushScreenWithTransition(
+                      const QuizScreen(),
+                      screenName: 'Quiz',
                     );
                   },
                   child: Padding(
@@ -553,10 +552,9 @@ class MacroDashboardScreen extends ConsumerWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const DonationScreen(),
-                          ),
+                        context.pushScreenWithTransition(
+                          const DonationScreen(),
+                          screenName: 'Donation',
                         );
                       },
                       child: const Text('応援する'),
@@ -579,10 +577,9 @@ class MacroDashboardScreen extends ConsumerWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ChallengeListScreen(),
-                ),
+              context.pushScreenWithTransition(
+                const ChallengeListScreen(),
+                screenName: 'ChallengeList',
               );
             },
             icon: const Icon(Icons.how_to_vote),

@@ -6,6 +6,7 @@ import '../../application/usecases/check_new_achievements.dart';
 import '../../domain/entities/quiz.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/achievement_unlock_dialog.dart';
 import 'quiz_result_screen.dart';
@@ -74,8 +75,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         await showAchievementUnlockDialogs(context, newlyUnlocked);
       }
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const QuizResultScreen()),
+      context.pushReplacementScreenWithTransition(
+        const QuizResultScreen(),
+        screenName: 'QuizResult',
       );
       return;
     }

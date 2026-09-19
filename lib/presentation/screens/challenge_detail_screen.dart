@@ -23,8 +23,10 @@ import '../../domain/entities/comment.dart';
 import '../../domain/entities/diet_bill.dart';
 import '../../domain/entities/issue_advocate.dart';
 import '../../domain/entities/policy_option.dart';
+import '../../domain/services/demographic_relevance.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
+import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/achievement_unlock_dialog.dart';
 import '../widgets/chart_axis.dart';
@@ -120,8 +122,9 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
             icon: const Icon(Icons.menu_book_outlined),
             tooltip: '用語集',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const GlossaryScreen()),
+              context.pushScreenWithTransition(
+                const GlossaryScreen(),
+                screenName: 'Glossary',
               );
             },
           ),
@@ -309,6 +312,32 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
                 ),
               ],
 
+              const SizedBox(height: AppSpacing.lg),
+              const Text(
+                'どんな人に関係が強い？',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _RelevanceBarChart(
+                title: '所得層',
+                entries: DemographicRelevance.incomeRelevance(challenge),
+                order: const ['low', 'mid', 'high'],
+                labels: const {'low': '低所得層', 'mid': '中所得層', 'high': '高所得層'},
+                color: color,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _RelevanceBarChart(
+                title: '地域',
+                entries: DemographicRelevance.regionRelevance(challenge),
+                order: const ['urban', 'local', 'rural'],
+                labels: const {
+                  'urban': '大都市',
+                  'local': '地方都市',
+                  'rural': '過疎地域',
+                },
+                color: color,
+              ),
+
               KeyedSubtree(
                 key: _dietBillKey,
                 child: _DietBillSection(
@@ -492,6 +521,130 @@ class _GenerationAgreementMap extends StatelessWidget {
           ],
           Text(
             '「これは問題」と回答した人のうち、最も賛同度が高いのは${_labels[maxEntry.key]}です。',
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 所得層・地域など、任意の切り口での関連度を表す棒グラフ。
+/// カテゴリ・タグから機械的に算出した推定値のため、その旨を明記する。
+class _RelevanceBarChart extends StatelessWidget {
+  final String title;
+  final Map<String, double> entries;
+  final List<String> order;
+  final Map<String, String> labels;
+  final Color color;
+
+  const _RelevanceBarChart({
+    required this.title,
+    required this.entries,
+    required this.order,
+    required this.labels,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sorted = order
+        .where((key) => entries.containsKey(key))
+        .map((key) => MapEntry(key, entries[key]!))
+        .toList();
+
+    if (sorted.isEmpty) return const SizedBox.shrink();
+
+    final maxEntry = sorted.reduce((a, b) => a.value > b.value ? a : b);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: const Text(
+                  '推定',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          for (final entry in sorted) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 64,
+                    child: Text(
+                      labels[entry.key] ?? entry.key,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: entry.value,
+                        minHeight: 14,
+                        backgroundColor: AppColors.background,
+                        valueColor: AlwaysStoppedAnimation(
+                          entry.key == maxEntry.key
+                              ? color
+                              : color.withValues(alpha: 0.45),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  SizedBox(
+                    width: 40,
+                    child: Text(
+                      '${(entry.value * 100).round()}%',
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          Text(
+            'カテゴリ・タグから算出した推定値です。最も関連が強いのは${labels[maxEntry.key]}。',
             style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
         ],
