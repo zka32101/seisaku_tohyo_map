@@ -4,7 +4,7 @@ import 'package:nihon_future_map/infrastructure/providers/trending_provider.dart
 
 /// Screen displaying top 10 trending challenges with rank-based visualization
 class TrendingChallengesScreen extends ConsumerWidget {
-  const TrendingChallengesScreen({Key? key}) : super(key: key);
+  const TrendingChallengesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,13 +47,13 @@ class TrendingChallengesScreen extends ConsumerWidget {
 /// Widget for displaying a single trending challenge
 class TrendingCard extends StatelessWidget {
   const TrendingCard({
-    Key? key,
+    super.key,
     required this.rank,
     required this.title,
     required this.voteCount,
     required this.voteChange,
     required this.category,
-  }) : super(key: key);
+  });
 
   final int rank;
   final String title;

@@ -15,7 +15,9 @@ class SelectedInterestsNotifier
     try {
       final box = await Hive.openBox<List<dynamic>>(_boxName);
       final interests = box.get(_interestsKey, defaultValue: <String>[]);
-      final stringInterests = interests.cast<String>().toList();
+      final stringInterests = (interests ?? const <String>[])
+          .cast<String>()
+          .toList();
       state = AsyncValue.data(stringInterests);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
@@ -25,7 +27,10 @@ class SelectedInterestsNotifier
   Future<void> addInterest(String interest) async {
     try {
       final box = await Hive.openBox<List<dynamic>>(_boxName);
-      final current = state.maybeWhen(data: (v) => v, orElse: () => []);
+      final current = state.maybeWhen<List<String>>(
+        data: (v) => v,
+        orElse: () => <String>[],
+      );
 
       if (!current.contains(interest)) {
         final updated = [...current, interest];
@@ -40,7 +45,10 @@ class SelectedInterestsNotifier
   Future<void> removeInterest(String interest) async {
     try {
       final box = await Hive.openBox<List<dynamic>>(_boxName);
-      final current = state.maybeWhen(data: (v) => v, orElse: () => []);
+      final current = state.maybeWhen<List<String>>(
+        data: (v) => v,
+        orElse: () => <String>[],
+      );
 
       final updated = current.where((i) => i != interest).toList();
       await box.put(_interestsKey, updated);
@@ -52,7 +60,10 @@ class SelectedInterestsNotifier
 
   Future<void> toggle(String interest) async {
     try {
-      final current = state.maybeWhen(data: (v) => v, orElse: () => []);
+      final current = state.maybeWhen<List<String>>(
+        data: (v) => v,
+        orElse: () => <String>[],
+      );
 
       if (current.contains(interest)) {
         await removeInterest(interest);
@@ -84,7 +95,8 @@ class ThemeModeNotifier extends StateNotifier<AsyncValue<String>> {
   Future<void> _init() async {
     try {
       final box = await Hive.openBox<String>(_boxName);
-      final themeMode = box.get(_themeModeKey, defaultValue: _defaultTheme);
+      final themeMode =
+          box.get(_themeModeKey, defaultValue: _defaultTheme) ?? _defaultTheme;
       state = AsyncValue.data(themeMode);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);

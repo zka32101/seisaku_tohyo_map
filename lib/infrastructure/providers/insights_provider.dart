@@ -121,7 +121,9 @@ final insightsProvider = FutureProvider.family<UserInsights, String>((
       avgDaysBetweenVotes = totalDays / (voteTimestamps.length - 1);
     }
 
-    final votingConsistency = (100 / (avgDaysBetweenVotes + 1)).clamp(0, 100);
+    final votingConsistency = (100 / (avgDaysBetweenVotes + 1))
+        .clamp(0, 100)
+        .toDouble();
 
     insights.add(
       VotingInsight(
@@ -159,7 +161,7 @@ final insightsProvider = FutureProvider.family<UserInsights, String>((
     insights.add(
       VotingInsight(
         title: '次の投票予測',
-        description: 'パターンから約${predictedDaysUntilNextVote}日後に投票する可能性があります',
+        description: 'パターンから約$predictedDaysUntilNextVote日後に投票する可能性があります',
         icon: '🔮',
         value: predictedDaysUntilNextVote.toDouble(),
         unit: '日',

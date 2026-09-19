@@ -4,7 +4,7 @@ import 'package:nihon_future_map/infrastructure/providers/search_provider.dart';
 
 /// Advanced search screen with keyword, category filter, and sorting options
 class AdvancedSearchScreen extends ConsumerStatefulWidget {
-  const AdvancedSearchScreen({Key? key}) : super(key: key);
+  const AdvancedSearchScreen({super.key});
 
   @override
   ConsumerState<AdvancedSearchScreen> createState() =>
@@ -69,8 +69,8 @@ class _AdvancedSearchScreenState extends ConsumerState<AdvancedSearchScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                onChanged: (_) => setState(() {}),
               ),
+              onChanged: (_) => setState(() {}),
             ),
           ),
 

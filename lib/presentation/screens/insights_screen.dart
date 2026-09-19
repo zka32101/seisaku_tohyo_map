@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:nihon_future_map/infrastructure/providers/insights_provider.dart';
 
 /// Advanced insights and political affinity analysis screen
 class InsightsScreen extends ConsumerWidget {
-  const InsightsScreen({Key? key, required this.userId}) : super(key: key);
+  const InsightsScreen({super.key, required this.userId});
 
   final String userId;
 

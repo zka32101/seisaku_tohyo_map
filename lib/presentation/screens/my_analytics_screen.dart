@@ -5,7 +5,7 @@ import 'package:nihon_future_map/infrastructure/providers/analytics_provider.dar
 
 /// Personal analytics dashboard screen showing voting patterns and interest analysis
 class MyAnalyticsScreen extends ConsumerWidget {
-  const MyAnalyticsScreen({Key? key, required this.userId}) : super(key: key);
+  const MyAnalyticsScreen({super.key, required this.userId});
 
   final String userId;
 

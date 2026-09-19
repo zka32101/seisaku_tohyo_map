@@ -5,8 +5,7 @@ import 'package:nihon_future_map/infrastructure/providers/user_preferences_provi
 
 /// Personalized recommendations screen showing challenges matched to user interests
 class RecommendationsScreen extends ConsumerWidget {
-  const RecommendationsScreen({Key? key, required this.userId})
-    : super(key: key);
+  const RecommendationsScreen({super.key, required this.userId});
 
   final String userId;
 
@@ -163,7 +162,7 @@ class RecommendationsScreen extends ConsumerWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(

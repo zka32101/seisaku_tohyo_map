@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -92,8 +94,8 @@ final recommendationProvider =
           final daysSinceCreated = DateTime.now().difference(createdAt).inDays;
           const recencyDecay = 0.95;
           final recencyWeight = daysSinceCreated > 0
-              ? recencyDecay ^
-                    (daysSinceCreated / 30) // Decay over months
+              ? pow(recencyDecay, daysSinceCreated / 30)
+                    .toDouble() // Decay over months
               : 1.0;
 
           final voteCount = data['vote_count'] as int? ?? 0;

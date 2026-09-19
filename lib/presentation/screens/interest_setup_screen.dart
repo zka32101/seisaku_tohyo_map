@@ -4,7 +4,7 @@ import 'package:nihon_future_map/infrastructure/providers/user_preferences_provi
 
 /// Onboarding screen for user interest field selection
 class InterestSetupScreen extends ConsumerWidget {
-  const InterestSetupScreen({Key? key}) : super(key: key);
+  const InterestSetupScreen({super.key});
 
   static const List<String> interestCategories = [
     '経済・財政',
