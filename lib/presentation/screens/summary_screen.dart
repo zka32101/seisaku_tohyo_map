@@ -4,7 +4,7 @@ import 'package:nihon_future_map/infrastructure/providers/summary_provider.dart'
 
 /// Summary dashboard showing weekly and monthly voting summaries
 class SummaryScreen extends ConsumerWidget {
-  const SummaryScreen({Key? key, required this.userId}) : super(key: key);
+  const SummaryScreen({super.key, required this.userId});
 
   final String userId;
 
@@ -215,7 +215,7 @@ class SummaryScreen extends ConsumerWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -255,8 +255,8 @@ class SummaryScreen extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     color: summary.isConsistent
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.orange.withOpacity(0.1),
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -316,7 +316,7 @@ class SummaryScreen extends ConsumerWidget {
                     .map(
                       (category) => Chip(
                         label: Text(category),
-                        backgroundColor: Colors.green.withOpacity(0.1),
+                        backgroundColor: Colors.green.withValues(alpha: 0.1),
                         labelStyle: const TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.w500,
@@ -333,7 +333,7 @@ class SummaryScreen extends ConsumerWidget {
 
   Widget _buildInsightCard(WeeklySummary summary) {
     return Card(
-      color: Colors.blue.withOpacity(0.1),
+      color: Colors.blue.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -529,7 +529,7 @@ class SummaryScreen extends ConsumerWidget {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -579,7 +579,7 @@ class SummaryScreen extends ConsumerWidget {
 
   Widget _buildMonthlyInsightCard(MonthlySummary summary) {
     return Card(
-      color: Colors.purple.withOpacity(0.1),
+      color: Colors.purple.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(

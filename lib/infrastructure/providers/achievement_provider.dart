@@ -11,7 +11,7 @@ class Achievement {
   final String type; // 'votes', 'categories', 'trends', 'voting_streak'
   final DateTime? unlockedAt;
 
-  Achievement({
+  const Achievement({
     required this.id,
     required this.name,
     required this.description,

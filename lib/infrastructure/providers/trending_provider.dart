@@ -54,7 +54,7 @@ final trendingProvider = FutureProvider<List<TrendingItem>>((ref) async {
           )
           .count()
           .get();
-      final thisWeekVotes = thisWeekSnapshot.count;
+      final thisWeekVotes = thisWeekSnapshot.count ?? 0;
 
       // Count votes from last week
       final lastWeekSnapshot = await firestore
@@ -71,7 +71,7 @@ final trendingProvider = FutureProvider<List<TrendingItem>>((ref) async {
           )
           .count()
           .get();
-      final lastWeekVotes = lastWeekSnapshot.count;
+      final lastWeekVotes = lastWeekSnapshot.count ?? 0;
 
       trendingItems.add(
         TrendingItem(

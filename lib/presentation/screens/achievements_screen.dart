@@ -4,7 +4,7 @@ import 'package:nihon_future_map/infrastructure/providers/achievement_provider.d
 
 /// Achievements and gamification screen
 class AchievementsScreen extends ConsumerWidget {
-  const AchievementsScreen({Key? key, required this.userId}) : super(key: key);
+  const AchievementsScreen({super.key, required this.userId});
 
   final String userId;
 
@@ -108,15 +108,18 @@ class AchievementsScreen extends ConsumerWidget {
 
   Widget _buildAchievementCard(Achievement achievement, bool isUnlocked) {
     return Card(
-      color: isUnlocked ? null : Colors.grey.withOpacity(0.2),
+      color: isUnlocked ? null : Colors.grey.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              achievement.icon,
-              style: TextStyle(fontSize: 40, opacity: isUnlocked ? 1.0 : 0.3),
+            Opacity(
+              opacity: isUnlocked ? 1.0 : 0.3,
+              child: Text(
+                achievement.icon,
+                style: const TextStyle(fontSize: 40),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -148,7 +151,7 @@ class AchievementsScreen extends ConsumerWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
+                    color: Colors.green.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(

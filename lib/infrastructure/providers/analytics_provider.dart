@@ -34,7 +34,7 @@ class InterestTrend {
     required this.thisMonthCount,
   });
 
-  get trend => thisMonthCount - lastMonthCount;
+  int get trend => thisMonthCount - lastMonthCount;
 }
 
 /// Riverpod provider for user analytics

@@ -5,10 +5,10 @@ import 'package:nihon_future_map/infrastructure/providers/discussion_provider.da
 /// Challenge discussion and comments screen
 class ChallengeDiscussionScreen extends ConsumerStatefulWidget {
   const ChallengeDiscussionScreen({
-    Key? key,
+    super.key,
     required this.challengeId,
     required this.userId,
-  }) : super(key: key);
+  });
 
   final String challengeId;
   final String userId;
@@ -194,12 +194,14 @@ class _ChallengeDiscussionScreenState
       _displayNameController.clear();
 
       // Refresh the discussion
-      ref.refresh(discussionProvider(widget.challengeId));
+      ref.invalidate(discussionProvider(widget.challengeId));
 
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('コメントが送信されました')));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('エラー: $e')));
@@ -214,8 +216,9 @@ class _ChallengeDiscussionScreenState
       );
 
       // Refresh the discussion
-      ref.refresh(discussionProvider(widget.challengeId));
+      ref.invalidate(discussionProvider(widget.challengeId));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('エラー: $e')));
