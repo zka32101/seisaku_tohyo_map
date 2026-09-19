@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/firebase_provider.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/policy_option.dart';
-import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import 'challenge_detail_screen.dart';
 

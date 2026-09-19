@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Custom slide transition from right to left for screen navigation
-class SlideRightTransition extends PageRouteBuilder {
+class SlideRightTransition<T> extends PageRouteBuilder<T> {
   final Widget page;
   final String screenName;
 
@@ -45,22 +45,22 @@ class NavigationContext {
 /// Extension on BuildContext for enhanced navigation
 extension NavigationExtension on BuildContext {
   /// Push a screen with smooth slide transition
-  Future<T?> pushScreenWithTransition<T>(
+  Future<T?> pushScreenWithTransition<T extends Object?>(
     Widget screen, {
     String screenName = '',
   }) {
     return Navigator.of(
       this,
-    ).push<T>(SlideRightTransition(page: screen, screenName: screenName));
+    ).push<T>(SlideRightTransition<T>(page: screen, screenName: screenName));
   }
 
   /// Push replacement with transition
-  Future<T?> pushReplacementScreenWithTransition<T>(
+  Future<T?> pushReplacementScreenWithTransition<T extends Object?>(
     Widget screen, {
     String screenName = '',
   }) {
     return Navigator.of(this).pushReplacement<T, T>(
-      SlideRightTransition(page: screen, screenName: screenName),
+      SlideRightTransition<T>(page: screen, screenName: screenName),
     );
   }
 

@@ -8,7 +8,6 @@ import '../../application/usecases/load_diet_bills.dart';
 import '../../application/usecases/load_international_comparisons.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/good_news_item.dart';
-import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import 'age_input_screen.dart';
 import 'challenge_detail_screen.dart';

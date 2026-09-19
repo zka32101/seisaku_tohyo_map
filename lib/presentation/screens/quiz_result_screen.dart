@@ -6,7 +6,6 @@ import 'package:share_plus/share_plus.dart';
 import '../../application/providers/quiz_provider.dart';
 import '../../domain/entities/quiz.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
-import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import 'quiz_screen.dart';
 
