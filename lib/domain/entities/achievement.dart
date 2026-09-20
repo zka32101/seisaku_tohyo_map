@@ -85,5 +85,35 @@ class Achievements {
       emoji: '☕',
       unlockedWhen: (s) => s.donationCount >= 1,
     ),
+    Achievement(
+      id: 'streak_3',
+      title: '3日連続投票',
+      description: '3日連続で投票した',
+      emoji: '🔥',
+      // longestVoteStreak は最高記録（単調増加）なので、ストリークが途切れた後も
+      // 一度達成した実績は解除済みのままになる
+      unlockedWhen: (s) => s.longestVoteStreak >= 3,
+    ),
+    Achievement(
+      id: 'streak_7',
+      title: '週間チャンピオン',
+      description: '7日連続で投票した',
+      emoji: '🔥🔥',
+      unlockedWhen: (s) => s.longestVoteStreak >= 7,
+    ),
+    Achievement(
+      id: 'streak_30',
+      title: '不屈の意志',
+      description: '30日連続で投票した（隠し実績）',
+      emoji: '👑',
+      unlockedWhen: (s) => s.longestVoteStreak >= 30,
+    ),
+    Achievement(
+      id: 'night_owl',
+      title: '夜更かし市民',
+      description: '深夜0時〜4時に投票した（隠し実績）',
+      emoji: '🦉',
+      unlockedWhen: (s) => s.hasVotedLateNight,
+    ),
   ];
 }

@@ -4,10 +4,16 @@ import '../../domain/entities/challenge.dart';
 import '../../domain/entities/comment.dart';
 import '../../domain/entities/policy_option.dart';
 import '../../infrastructure/firebase/firebase_service.dart';
+import '../../infrastructure/local_storage/activity_store.dart';
 import '../../infrastructure/local_storage/blocked_users_store.dart';
 import '../usecases/load_policy_options.dart';
 
 final firebaseServiceProvider = Provider((ref) => FirebaseService());
+
+// ユーザーが設定した都道府県（端末ローカルに永続化、初期値はActivityStoreから復元）
+final selectedPrefectureProvider = StateProvider<String?>(
+  (ref) => ActivityStore().selectedPrefecture,
+);
 
 // 認証 UID を取得
 final userIdProvider = FutureProvider<String?>((ref) async {

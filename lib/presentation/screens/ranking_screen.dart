@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers/firebase_provider.dart';
+import '../../application/usecases/load_prefecture_aging_stats.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/policy_option.dart';
+import '../../domain/entities/prefecture_aging_stat.dart';
+import '../../infrastructure/local_storage/activity_store.dart';
 import '../theme/app_theme.dart';
+import '../widgets/prefecture_picker.dart';
 import 'challenge_detail_screen.dart';
 
 class RankingScreen extends StatelessWidget {
@@ -14,15 +18,17 @@ class RankingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('週刊 ランキング'),
           bottom: const TabBar(
+            isScrollable: true,
             tabs: [
               Tab(text: '課題'),
               Tab(text: '対策案'),
               Tab(text: 'マップ'),
+              Tab(text: '地域'),
             ],
           ),
         ),
@@ -31,6 +37,7 @@ class RankingScreen extends StatelessWidget {
             _ChallengeRankingTab(),
             _PolicyOptionRankingTab(),
             _ChallengeMapTab(),
+            _RegionalRelevanceTab(),
           ],
         ),
       ),
@@ -672,6 +679,203 @@ class _BudgetMap extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// お住まいの都道府県の高齢化率（総務省統計局の実データ）を踏まえて、
+/// 関連度の高い課題を優先表示するタブ。
+///
+/// 注意: これは全国のユーザーの投票を都道府県別に集計したものではない
+/// （現状のアプリは投票データを地域別に集計する仕組みを持たない）。
+/// あくまで「あなたの地域の統計」と「課題のタグ」を突き合わせた
+/// パーソナライズ表示であり、他ユーザーとの比較ランキングではない。
+class _RegionalRelevanceTab extends ConsumerWidget {
+  const _RegionalRelevanceTab();
+
+  static const _agingRelevantTags = {'年金', '介護', '医療', '地方'};
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedPrefecture = ref.watch(selectedPrefectureProvider);
+
+    if (selectedPrefecture == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.location_on_outlined,
+                size: 40,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const Text(
+                'お住まいの都道府県を設定すると、\n地域に関連が深い課題を優先して表示します',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              ElevatedButton(
+                onPressed: () async {
+                  final picked = await showPrefecturePicker(context);
+                  if (picked != null) {
+                    await ActivityStore().setSelectedPrefecture(picked);
+                    ref.read(selectedPrefectureProvider.notifier).state =
+                        picked;
+                  }
+                },
+                child: const Text('都道府県を設定する'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final stat = LoadPrefectureAgingStats.all.firstWhere(
+      (s) => s.name == selectedPrefecture,
+      orElse: () => LoadPrefectureAgingStats.all.first,
+    );
+    final nationalAverage =
+        LoadPrefectureAgingStats.all
+            .map((s) => s.agingRatePercent)
+            .reduce((a, b) => a + b) /
+        LoadPrefectureAgingStats.all.length;
+    final isAboveAverage = stat.agingRatePercent > nationalAverage;
+
+    final challengesAsync = ref.watch(challengesProvider);
+
+    return challengesAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('エラー: $err')),
+      data: (challenges) {
+        final relevant = isAboveAverage
+            ? (challenges
+                  .where((c) => c.tags.any(_agingRelevantTags.contains))
+                  .toList()
+                ..sort((a, b) => b.agreeCount.compareTo(a.agreeCount)))
+            : <Challenge>[];
+        final relevantIds = relevant.map((c) => c.id).toSet();
+        final others = [...challenges]
+          ..removeWhere((c) => relevantIds.contains(c.id))
+          ..sort((a, b) => b.agreeCount.compareTo(a.agreeCount));
+
+        return ListView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          children: [
+            _RegionStatCard(
+              stat: stat,
+              nationalAverage: nationalAverage,
+              isAboveAverage: isAboveAverage,
+              onChangePrefecture: () async {
+                final picked = await showPrefecturePicker(context);
+                if (picked != null) {
+                  await ActivityStore().setSelectedPrefecture(picked);
+                  ref.read(selectedPrefectureProvider.notifier).state = picked;
+                }
+              },
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            if (relevant.isNotEmpty) ...[
+              const Text(
+                'あなたの地域で特に関連が深い課題',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              ...relevant.asMap().entries.map(
+                (e) =>
+                    _ChallengeRankingRow(rank: e.key + 1, challenge: e.value),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              const Text(
+                'その他の課題',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            ...others.asMap().entries.map(
+              (e) => _ChallengeRankingRow(
+                rank: relevant.length + e.key + 1,
+                challenge: e.value,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _RegionStatCard extends StatelessWidget {
+  final PrefectureAgingStat stat;
+  final double nationalAverage;
+  final bool isAboveAverage;
+  final VoidCallback onChangePrefecture;
+
+  const _RegionStatCard({
+    required this.stat,
+    required this.nationalAverage,
+    required this.isAboveAverage,
+    required this.onChangePrefecture,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  stat.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: onChangePrefecture,
+                child: const Text('変更', style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '高齢化率 ${stat.agingRatePercent.toStringAsFixed(1)}%'
+            '（全国平均 ${nationalAverage.toStringAsFixed(1)}%）',
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            isAboveAverage
+                ? '全国平均より高齢化が進んでいる地域です。年金・介護・医療・地方関連の課題を優先表示しています。'
+                : '全国平均と比べて高齢化率は低めの地域です。ここでは全国の課題ランキングをそのまま表示しています。',
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '出典: ${LoadPrefectureAgingStats.sourceLabel}',
+            style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+          ),
+        ],
+      ),
     );
   }
 }

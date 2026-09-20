@@ -7,6 +7,7 @@ import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/chart_axis.dart';
 import '../widgets/offline_banner.dart';
+import '../widgets/vote_reminder_banner.dart';
 import 'challenge_list_screen.dart';
 import 'donation_screen.dart';
 import 'glossary_screen.dart';
@@ -92,6 +93,7 @@ class MacroDashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.md),
             children: [
               const OfflineBanner(),
+              const VoteReminderBanner(),
               _DashboardSection(
                 title: '人口はどれだけ減る？',
                 subtitle: '2023年 → 2070年',

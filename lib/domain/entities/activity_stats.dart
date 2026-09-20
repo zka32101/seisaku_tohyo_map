@@ -8,6 +8,9 @@ class ActivityStats {
   final int quizzesCompletedCount;
   final int donationCount;
   final bool hasCalculatedPension;
+  final int voteStreakDays;
+  final int longestVoteStreak;
+  final bool hasVotedLateNight;
 
   const ActivityStats({
     required this.votedChallengeCount,
@@ -18,5 +21,8 @@ class ActivityStats {
     required this.quizzesCompletedCount,
     required this.donationCount,
     required this.hasCalculatedPension,
+    this.voteStreakDays = 0,
+    this.longestVoteStreak = 0,
+    this.hasVotedLateNight = false,
   });
 }

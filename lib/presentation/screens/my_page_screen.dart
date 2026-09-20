@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers/firebase_provider.dart';
 import '../../application/providers/proposal_provider.dart';
+import '../../application/usecases/load_diet_bills.dart';
+import '../../application/usecases/load_issue_advocates.dart';
 import '../../domain/entities/achievement.dart';
 import '../../domain/entities/activity_stats.dart';
+import '../../domain/entities/challenge.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
 import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
+import '../widgets/prefecture_picker.dart';
 import 'about_screen.dart';
 import 'challenge_detail_screen.dart';
 
@@ -23,12 +27,26 @@ class MyPageScreen extends ConsumerWidget {
 
     final challengesAsync = ref.watch(challengesProvider);
     final votedChallengeIds = ActivityStore().votedChallengeIds;
+    final selectedPrefecture = ref.watch(selectedPrefectureProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('マイページ')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
+          _StreakCard(stats: stats),
+          const SizedBox(height: AppSpacing.md),
+          _PrefectureSettingRow(
+            selected: selectedPrefecture,
+            onTap: () async {
+              final picked = await showPrefecturePicker(context);
+              if (picked != null) {
+                await ActivityStore().setSelectedPrefecture(picked);
+                ref.read(selectedPrefectureProvider.notifier).state = picked;
+              }
+            },
+          ),
+          const SizedBox(height: AppSpacing.lg),
           _StatsGrid(stats: stats),
           const SizedBox(height: AppSpacing.lg),
           Row(
@@ -107,6 +125,16 @@ class MyPageScreen extends ConsumerWidget {
             },
           ),
           const SizedBox(height: AppSpacing.lg),
+          challengesAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (err, stack) => const SizedBox.shrink(),
+            data: (challenges) => _VoiceDeliveredSection(
+              votedChallenges: challenges
+                  .where((c) => votedChallengeIds.contains(c.id))
+                  .toList(),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           const Text(
             'あなたが提案した課題',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
@@ -155,6 +183,165 @@ class MyPageScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 連続投票日数（ストリーク）を目立たせて表示するカード。
+/// 継続利用の動機付けのため、マイページ最上部に常時表示する。
+class _StreakCard extends StatelessWidget {
+  final ActivityStats stats;
+
+  const _StreakCard({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    final streak = stats.voteStreakDays;
+    final hasStreak = streak > 0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: hasStreak ? AppColors.primary : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: hasStreak ? null : Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Text(hasStreak ? '🔥' : '💤', style: const TextStyle(fontSize: 32)),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hasStreak ? '$streak日連続で投票中' : '今日から投票を始めよう',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: hasStreak ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+                if (stats.longestVoteStreak > 0)
+                  Text(
+                    '最長記録: ${stats.longestVoteStreak}日',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: hasStreak ? Colors.white70 : AppColors.textMuted,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// お住まいの都道府県設定行。ランキング画面の「地域」タブでの
+/// パーソナライズ表示に使う。
+class _PrefectureSettingRow extends StatelessWidget {
+  final String? selected;
+  final VoidCallback onTap;
+
+  const _PrefectureSettingRow({required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.badge),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.badge),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.location_on_outlined,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  selected == null ? 'お住まいの都道府県を設定する' : selected!,
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: AppColors.textMuted,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 自分が賛同した課題のうち、国会での動き（法案審議）や協力団体の活動など、
+/// 実際に「声が届いている」ことが確認できるものをハイライトするセクション。
+class _VoiceDeliveredSection extends StatelessWidget {
+  final List<Challenge> votedChallenges;
+
+  const _VoiceDeliveredSection({required this.votedChallenges});
+
+  @override
+  Widget build(BuildContext context) {
+    final delivered = votedChallenges.where((c) {
+      return LoadDietBills.forChallenge(c.id).isNotEmpty ||
+          LoadIssueAdvocates.forChallenge(c.id).isNotEmpty;
+    }).toList();
+
+    if (delivered.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.campaign, size: 16, color: AppColors.success),
+            const SizedBox(width: 6),
+            const Text(
+              'あなたの声が届いています',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '${delivered.length}件',
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        ...delivered.map(
+          (c) => _MiniChallengeRow(
+            title: c.name,
+            category: c.category,
+            onTap: () => context.pushScreenWithTransition(
+              ChallengeDetailScreen(challenge: c),
+              screenName: 'ChallengeDetail',
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
