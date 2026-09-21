@@ -466,8 +466,12 @@ class _AttentionMap extends StatelessWidget {
                       final challenge = index >= 0 && index < targets.length
                           ? targets[index]
                           : null;
+                      final agreeRate = (spot.x * 100).round();
+                      final detail = challenge == null
+                          ? ''
+                          : '\n賛同率: $agreeRate% / 投票数: ${challenge.voteCount}';
                       return ScatterTooltipItem(
-                        challenge?.name ?? '',
+                        '${challenge?.name ?? ''}$detail',
                         textStyle: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -636,8 +640,13 @@ class _BudgetMap extends StatelessWidget {
                       final challenge = index >= 0 && index < targets.length
                           ? targets[index]
                           : null;
+                      final budget = challenge?.budgetTrillionYen;
+                      final detail = budget == null
+                          ? ''
+                          : '\n予算規模: ${budget.toStringAsFixed(1)}兆円 / '
+                                '投票数: ${challenge!.voteCount}';
                       return ScatterTooltipItem(
-                        challenge?.name ?? '',
+                        '${challenge?.name ?? ''}$detail',
                         textStyle: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
