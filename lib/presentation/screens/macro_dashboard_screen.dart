@@ -96,7 +96,7 @@ class MacroDashboardScreen extends ConsumerWidget {
               const VoteReminderBanner(),
               _DashboardSection(
                 title: '人口はどれだけ減る？',
-                subtitle: '2023年 → 2070年',
+                subtitle: '2023年 → 2070年（単位: 百万人）',
                 footnote:
                     '${dashboard.populationTrend.first.population.toStringAsFixed(0)}百万人 → '
                     '${dashboard.populationTrend.last.population.toStringAsFixed(0)}百万人',
@@ -114,6 +114,12 @@ class MacroDashboardScreen extends ConsumerWidget {
                         ),
                       ),
                       borderData: FlBorderData(show: false),
+                      lineTouchData: buildLineTooltipTouchData(
+                        color: AppColors.populationBlue,
+                        labelForIndex: (i) =>
+                            '${dashboard.populationTrend[i].year}年',
+                        valueFormatter: (y) => '${y.toStringAsFixed(0)}百万人',
+                      ),
                       titlesData: FlTitlesData(
                         topTitles: const AxisTitles(),
                         rightTitles: const AxisTitles(),
@@ -172,7 +178,7 @@ class MacroDashboardScreen extends ConsumerWidget {
                           isCurved: true,
                           color: AppColors.populationBlue,
                           barWidth: 3,
-                          dotData: const FlDotData(show: false),
+                          dotData: const FlDotData(show: true),
                           belowBarData: BarAreaData(
                             show: true,
                             color: AppColors.populationBlue.withValues(
@@ -289,6 +295,12 @@ class MacroDashboardScreen extends ConsumerWidget {
                         ),
                       ),
                       borderData: FlBorderData(show: false),
+                      lineTouchData: buildLineTooltipTouchData(
+                        color: AppColors.pensionOrange,
+                        labelForIndex: (i) =>
+                            '${dashboard.energySelfSufficiency[i].year}年',
+                        valueFormatter: (y) => '${y.toStringAsFixed(1)}%',
+                      ),
                       titlesData: FlTitlesData(
                         topTitles: const AxisTitles(),
                         rightTitles: const AxisTitles(),
@@ -383,6 +395,12 @@ class MacroDashboardScreen extends ConsumerWidget {
                         ),
                       ),
                       borderData: FlBorderData(show: false),
+                      lineTouchData: buildLineTooltipTouchData(
+                        color: AppColors.careGreen,
+                        labelForIndex: (i) =>
+                            '${dashboard.healthcareCostTrend[i].year}年',
+                        valueFormatter: (y) => '${y.toStringAsFixed(1)}兆円',
+                      ),
                       titlesData: FlTitlesData(
                         topTitles: const AxisTitles(),
                         rightTitles: const AxisTitles(),
@@ -704,10 +722,24 @@ class _BudgetRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           SizedBox(
             width: 56,
-            child: Text(
-              '¥${amount.toStringAsFixed(1)}兆',
-              textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${percentage.toStringAsFixed(1)}%',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  '¥${amount.toStringAsFixed(1)}兆',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

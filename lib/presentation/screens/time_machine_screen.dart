@@ -100,12 +100,18 @@ class TimeMachineScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(AppRadius.card),
                   border: Border.all(color: AppColors.border),
                 ),
-                child: SizedBox(
-                  height: 240,
-                  child: _PolicyChart(
-                    simulation: simulation,
-                    selectedYear: selectedYear,
-                  ),
+                child: Column(
+                  children: [
+                    const _PolicyLegend(),
+                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(
+                      height: 240,
+                      child: _PolicyChart(
+                        simulation: simulation,
+                        selectedYear: selectedYear,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -167,6 +173,42 @@ class TimeMachineScreen extends ConsumerWidget {
   }
 }
 
+/// グラフの4本の線が何を表すかを示す凡例。
+/// 色分けされた折れ線だけでは一目で判別しにくいため、グラフ直上に常時表示する。
+class _PolicyLegend extends StatelessWidget {
+  const _PolicyLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: 4,
+      children: PolicyType.values.map((policy) {
+        final color = _policyColors[policy]!;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              policy.label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+}
+
 class _PolicyChart extends StatelessWidget {
   final PolicySimulation simulation;
   final int selectedYear;
@@ -198,6 +240,33 @@ class _PolicyChart extends StatelessWidget {
               const FlLine(color: AppColors.border, strokeWidth: 1),
         ),
         borderData: FlBorderData(show: false),
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (spot) =>
+                _policyColors[PolicyType.values[spot.barIndex]] ??
+                AppColors.textMuted,
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.map((spot) {
+                final policy = PolicyType.values[spot.barIndex];
+                final year = simulation
+                    .yearData[spot.x.round().clamp(
+                      0,
+                      simulation.yearData.length - 1,
+                    )]
+                    .year;
+                return LineTooltipItem(
+                  '${policy.label}（$year年）\n'
+                  '${spot.y.toStringAsFixed(1)}$unit',
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                );
+              }).toList();
+            },
+          ),
+        ),
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(),
           rightTitles: const AxisTitles(),
