@@ -1174,20 +1174,56 @@ class _AgreeSectionState extends ConsumerState<_AgreeSection> {
         (ids) => ids.contains(widget.challengeId),
       ),
     );
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: agreed ? null : _onAgree,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          side: BorderSide(color: agreed ? AppColors.border : widget.color),
-          foregroundColor: agreed ? AppColors.textMuted : widget.color,
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: agreed ? null : _onAgree,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: BorderSide(color: agreed ? AppColors.border : widget.color),
+              foregroundColor: agreed ? AppColors.textMuted : widget.color,
+            ),
+            child: Text(
+              agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          ),
         ),
-        child: Text(
-          agreed ? '賛同済み ✓ ($_agreeCount)' : 'これは問題 ($_agreeCount)',
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-        ),
-      ),
+        if (agreed) _PrefectureAgreeStats(challengeId: widget.challengeId),
+      ],
+    );
+  }
+}
+
+/// 自分が設定した都道府県からの賛同が、全体のうちどれくらいの割合かを表示する。
+/// 都道府県を設定していないユーザーは集計に含まれないため、あくまで参考値。
+class _PrefectureAgreeStats extends ConsumerWidget {
+  final String challengeId;
+
+  const _PrefectureAgreeStats({required this.challengeId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ActivityStore().selectedPrefecture;
+    if (selected == null) return const SizedBox.shrink();
+
+    final statsAsync = ref.watch(prefectureAgreeStatsProvider(challengeId));
+    return statsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
+      data: (stats) {
+        if (stats == null || stats.total == 0) return const SizedBox.shrink();
+        final pct = (stats.fromPrefecture / stats.total * 100).round();
+        return Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            '$selected からの賛同: ${stats.fromPrefecture}/${stats.total}件（約$pct%）',
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          ),
+        );
+      },
     );
   }
 }
@@ -1849,6 +1885,11 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
 
     if (result) {
       AnalyticsService().logCommentPosted(challengeId: widget.challengeId);
+      if (parentId == null) {
+        // 返信ではなくトップレベルの新規コメント。後で「この課題に自分のコメントが
+        // あるか」を確認できるよう記録しておく（返信通知バッジの対象を絞り込むため）
+        await ActivityStore().addCommentedChallenge(widget.challengeId);
+      }
       final newlyUnlocked = await CheckNewAchievements.call(
         () => ActivityStore().incrementCommentsPosted(),
       );

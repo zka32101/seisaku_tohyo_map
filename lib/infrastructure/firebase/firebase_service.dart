@@ -70,15 +70,26 @@ class FirebaseService {
     }
   }
 
-  // 課題に「賛同」をする
-  Future<bool> agreeChallenge(String userId, String challengeId) async {
+  // 課題に「賛同」をする（prefectureを渡すと都道府県別の賛同傾向集計に使われる。任意・匿名）
+  Future<bool> agreeChallenge(
+    String userId,
+    String challengeId, {
+    String? prefecture,
+  }) async {
     try {
+      final agreeData = <String, dynamic>{
+        'userId': userId,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+      if (prefecture != null) {
+        agreeData['prefecture'] = prefecture;
+      }
       await _firestore
           .collection('challenges')
           .doc(challengeId)
           .collection('agrees')
           .doc(userId)
-          .set({'userId': userId, 'timestamp': FieldValue.serverTimestamp()});
+          .set(agreeData);
 
       // 賛同数を増加
       // 課題ドキュメント自体はFirestoreに事前作成されていない（一覧はモックデータ表示のため）ので、
@@ -92,6 +103,54 @@ class FirebaseService {
     } catch (e) {
       _logger.e('Error agreeing challenge: $e');
       return false;
+    }
+  }
+
+  // 課題ごとの実際の賛同数（Firestoreの `challenges/{id}` ドキュメントに集計されている値）。
+  // 課題一覧はモックデータ（agreeCountは常に0）を使っているため、一覧表示の際に
+  // ここで取得した実数をマージして、実際の賛同数を表示できるようにする
+  // （policyOptionsのextraVotesと同じパターン）。
+  Future<Map<String, int>> getChallengeAgreeCounts() async {
+    try {
+      final snapshot = await _firestore.collection('challenges').get();
+      return {
+        for (final doc in snapshot.docs)
+          doc.id: (doc.data()['agreeCount'] as int?) ?? 0,
+      };
+    } catch (e) {
+      _logger.e('Error fetching challenge agree counts: $e');
+      return {};
+    }
+  }
+
+  // 指定した課題について、全体の賛同数のうち「自分と同じ都道府県」を設定していた
+  // ユーザーからの賛同がどれくらいの割合かを取得する。
+  // 都道府県はユーザーが任意で設定した場合のみFirestoreに送信される（未設定なら集計対象外）。
+  // count()集計クエリを使うため、対象ドキュメントを全件ダウンロードせずに件数だけ取得できる。
+  Future<({int total, int fromPrefecture})?> getPrefectureAgreeStats(
+    String challengeId,
+    String prefecture,
+  ) async {
+    try {
+      final agreesRef = _firestore
+          .collection('challenges')
+          .doc(challengeId)
+          .collection('agrees');
+
+      final totalSnapshot = await agreesRef.count().get();
+      final total = totalSnapshot.count ?? 0;
+      if (total == 0) return (total: 0, fromPrefecture: 0);
+
+      final prefectureSnapshot = await agreesRef
+          .where('prefecture', isEqualTo: prefecture)
+          .count()
+          .get();
+      final fromPrefecture = prefectureSnapshot.count ?? 0;
+
+      return (total: total, fromPrefecture: fromPrefecture);
+    } catch (e) {
+      _logger.e('Error fetching prefecture agree stats: $e');
+      return null;
     }
   }
 

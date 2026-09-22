@@ -98,6 +98,7 @@ class ChallengeListScreen extends ConsumerWidget {
             votedIds,
             selectedInterests,
           );
+          final trending = _trending(challenges, excluding: recommended);
           final isSearching = searchQuery.trim().isNotEmpty;
           var filtered = selectedCategory == null
               ? challenges
@@ -240,6 +241,35 @@ class ChallengeListScreen extends ConsumerWidget {
                 const Divider(),
                 const SizedBox(height: AppSpacing.sm),
               ],
+              if (!isSearching &&
+                  trending.isNotEmpty &&
+                  selectedCategory == null) ...[
+                const Row(
+                  children: [
+                    Icon(
+                      Icons.local_fire_department,
+                      size: 16,
+                      color: AppColors.pensionOrange,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      '今、賛同が集まっている課題',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.pensionOrange,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                ...trending.map(
+                  (c) => _ChallengeCard(challenge: c, isTrending: true),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const Divider(),
+                const SizedBox(height: AppSpacing.sm),
+              ],
               ...filtered.map((c) => _ChallengeCard(challenge: c)),
             ],
           );
@@ -279,6 +309,22 @@ class ChallengeListScreen extends ConsumerWidget {
           ..sort((a, b) => b.voteCount.compareTo(a.voteCount));
 
     return candidates.take(2).toList();
+  }
+
+  // 実際にFirestoreへ書き込まれている賛同数（challengesProviderでマージ済み）が
+  // 多い順に上位を「急上昇」として表示する。「あなたへのおすすめ」と重複しないよう除外する
+  List<Challenge> _trending(
+    List<Challenge> challenges, {
+    required List<Challenge> excluding,
+  }) {
+    final excludedIds = excluding.map((c) => c.id).toSet();
+    final candidates =
+        challenges
+            .where((c) => c.agreeCount > 0 && !excludedIds.contains(c.id))
+            .toList()
+          ..sort((a, b) => b.agreeCount.compareTo(a.agreeCount));
+
+    return candidates.take(3).toList();
   }
 }
 
@@ -474,8 +520,13 @@ class _TagChip extends ConsumerWidget {
 class _ChallengeCard extends ConsumerStatefulWidget {
   final Challenge challenge;
   final bool isRecommended;
+  final bool isTrending;
 
-  const _ChallengeCard({required this.challenge, this.isRecommended = false});
+  const _ChallengeCard({
+    required this.challenge,
+    this.isRecommended = false,
+    this.isTrending = false,
+  });
 
   @override
   ConsumerState<_ChallengeCard> createState() => _ChallengeCardState();
@@ -592,6 +643,14 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
                       Icons.auto_awesome,
                       size: 13,
                       color: AppColors.primary,
+                    ),
+                  ],
+                  if (widget.isTrending) ...[
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.local_fire_department,
+                      size: 13,
+                      color: AppColors.pensionOrange,
                     ),
                   ],
                   if (LoadAgencyContacts.forChallenge(
