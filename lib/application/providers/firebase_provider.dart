@@ -26,10 +26,26 @@ final userIdProvider = FutureProvider<String?>((ref) async {
   return await service.signInAnonymously();
 });
 
-// 課題一覧を取得（モックデータ）
+// 課題の賛同数再取得用トリガー（賛同後にインクリメントしてrefreshする）
+final challengeAgreeCountsRefreshProvider = StateProvider<int>((ref) => 0);
+
+// 課題一覧を取得（モックデータ + Firestoreに実際に書き込まれている賛同数をマージ）
 final challengesProvider = FutureProvider<List<Challenge>>((ref) async {
-  // 本来は Firebase から取得するが、初期段階ではモックデータを使用
-  return FirebaseService.getMockChallenges();
+  ref.watch(challengeAgreeCountsRefreshProvider);
+  // 課題そのもの（説明文・カテゴリ等）は初期段階のためモックデータを使用するが、
+  // 賛同数だけは実際にFirestoreへ書き込まれている値を反映する
+  // （でなければ、賛同数はアプリを再起動するたびに0に戻ってしまう）
+  final challenges = FirebaseService.getMockChallenges();
+  final service = ref.watch(firebaseServiceProvider);
+  final realAgreeCounts = await service.getChallengeAgreeCounts();
+  if (realAgreeCounts.isEmpty) return challenges;
+
+  return challenges
+      .map(
+        (c) =>
+            c.copyWith(agreeCount: c.agreeCount + (realAgreeCounts[c.id] ?? 0)),
+      )
+      .toList();
 });
 
 // このセッションで「これは問題」に賛同した課題ID（おすすめ機能に利用）
@@ -51,8 +67,72 @@ final agreeChallengeProvider = FutureProvider.family<bool, String>((
 
   if (userId == null) return false;
 
-  return await service.agreeChallenge(userId, challengeId);
+  final result = await service.agreeChallenge(
+    userId,
+    challengeId,
+    prefecture: ActivityStore().selectedPrefecture,
+  );
+  if (result) {
+    ref.read(challengeAgreeCountsRefreshProvider.notifier).state++;
+  }
+  return result;
 });
+
+// 指定した課題について、自分と同じ都道府県からの賛同がどれくらいの割合かを取得する
+// （都道府県を設定していない場合はnull）
+final prefectureAgreeStatsProvider =
+    FutureProvider.family<({int total, int fromPrefecture})?, String>((
+      ref,
+      challengeId,
+    ) async {
+      final prefecture = ActivityStore().selectedPrefecture;
+      if (prefecture == null) return null;
+      final service = ref.watch(firebaseServiceProvider);
+      return await service.getPrefectureAgreeStats(challengeId, prefecture);
+    });
+
+// 自分のコメントに新しくついた「未読」の返信数（マイページのバッジ表示用）。
+// コメント投稿時に記録しておいた「自分が投稿したことのある課題」だけを対象に、
+// 現在の返信数と最後に確認した時点の返信数の差分を合計する。
+final myUnseenReplyCountProvider = FutureProvider<int>((ref) async {
+  final myUserId = await ref.read(userIdProvider.future);
+  if (myUserId == null) return 0;
+
+  final challengeIds = ActivityStore().commentedChallengeIds;
+  if (challengeIds.isEmpty) return 0;
+
+  final service = ref.watch(firebaseServiceProvider);
+  final seenCounts = ActivityStore().seenReplyCounts;
+  var unseen = 0;
+  for (final challengeId in challengeIds) {
+    final comments = await service.getComments(challengeId);
+    for (final comment in comments) {
+      if (comment.userId != myUserId || comment.replyCount == 0) continue;
+      final seen = seenCounts[comment.id] ?? 0;
+      if (comment.replyCount > seen) {
+        unseen += comment.replyCount - seen;
+      }
+    }
+  }
+  return unseen;
+});
+
+// 未読の返信をすべて「確認済み」にする（マイページのバッジをタップした時に呼ぶ）
+Future<void> markAllRepliesSeen(WidgetRef ref) async {
+  final myUserId = await ref.read(userIdProvider.future);
+  if (myUserId == null) return;
+
+  final service = ref.read(firebaseServiceProvider);
+  for (final challengeId in ActivityStore().commentedChallengeIds) {
+    final comments = await service.getComments(challengeId);
+    for (final comment in comments) {
+      if (comment.userId == myUserId && comment.replyCount > 0) {
+        await ActivityStore().markReplySeen(comment.id, comment.replyCount);
+      }
+    }
+  }
+  ref.invalidate(myUnseenReplyCountProvider);
+}
 
 // コメント再取得用のトリガー（投稿後にインクリメントしてrefreshする）
 final commentsRefreshProvider = StateProvider<int>((ref) => 0);

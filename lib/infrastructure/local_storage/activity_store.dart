@@ -148,6 +148,7 @@ class ActivityStore {
     } catch (e) {
       _logger.e('Error recording vote streak: $e');
     }
+    await _logActivity('vote');
   }
 
   /// 表示用の現在の連続投票日数。
@@ -196,11 +197,16 @@ class ActivityStore {
   }
 
   int get commentsPostedCount => _count('commentsPostedCount');
-  Future<void> incrementCommentsPosted() => _increment('commentsPostedCount');
+  Future<void> incrementCommentsPosted() async {
+    await _increment('commentsPostedCount');
+    await _logActivity('comment');
+  }
 
   int get quizzesCompletedCount => _count('quizzesCompletedCount');
-  Future<void> incrementQuizzesCompleted() =>
-      _increment('quizzesCompletedCount');
+  Future<void> incrementQuizzesCompleted() async {
+    await _increment('quizzesCompletedCount');
+    await _logActivity('quiz');
+  }
 
   int get donationCount => _count('donationCount');
   Future<void> incrementDonationCount() => _increment('donationCount');
@@ -259,15 +265,43 @@ class ActivityStore {
 
   String? voteMemoFor(String challengeId) => voteMemos[challengeId];
 
+  // メモを書いた（更新した）日時。「投票の記録」画面で新しい順に並べるために使う。
+  Map<String, DateTime> get _voteMemoTimestamps {
+    try {
+      final raw =
+          _box?.get('voteMemoTimestamps', defaultValue: const {}) as Map?;
+      final result = <String, DateTime>{};
+      for (final entry in (raw ?? const {}).entries) {
+        final parsed = DateTime.tryParse(entry.value.toString());
+        if (parsed != null) result[entry.key.toString()] = parsed;
+      }
+      return result;
+    } catch (e) {
+      _logger.e('Error reading voteMemoTimestamps: $e');
+      return {};
+    }
+  }
+
+  DateTime? voteMemoUpdatedAt(String challengeId) =>
+      _voteMemoTimestamps[challengeId];
+
   Future<void> setVoteMemo(String challengeId, String memo) async {
     try {
       final memos = Map<String, String>.from(voteMemos);
+      final timestamps = Map<String, String>.from(
+        _voteMemoTimestamps.map(
+          (key, value) => MapEntry(key, value.toIso8601String()),
+        ),
+      );
       if (memo.trim().isEmpty) {
         memos.remove(challengeId);
+        timestamps.remove(challengeId);
       } else {
         memos[challengeId] = memo.trim();
+        timestamps[challengeId] = DateTime.now().toIso8601String();
       }
       await _box?.put('voteMemos', memos);
+      await _box?.put('voteMemoTimestamps', timestamps);
     } catch (e) {
       _logger.e('Error writing voteMemos: $e');
     }
@@ -283,6 +317,81 @@ class ActivityStore {
       await _box?.put('followedChallengeIds', updated.toList());
     } else {
       await _addToSet('followedChallengeIds', challengeId);
+    }
+  }
+
+  // ── 自分がトップレベルコメントを投稿した課題（返信通知バッジ用）──
+  // コメント自体はFirestore側にしか無く「誰が投稿したか」を横断検索できないため、
+  // 「自分が投稿したことのある課題」だけを端末ローカルに覚えておき、
+  // 返信チェック時にその課題だけを対象にコメント一覧を取得する。
+  Set<String> get commentedChallengeIds => _stringSet('commentedChallengeIds');
+
+  Future<void> addCommentedChallenge(String challengeId) =>
+      _addToSet('commentedChallengeIds', challengeId);
+
+  // 自分のコメントについて、最後に確認した時点の返信数（コメントID→返信数）。
+  // 現在の返信数との差分が「未読の返信」としてバッジに表示される。
+  Map<String, int> get seenReplyCounts {
+    try {
+      final raw = _box?.get('seenReplyCounts', defaultValue: const {}) as Map?;
+      return (raw ?? const {}).map(
+        (key, value) => MapEntry(key.toString(), value as int? ?? 0),
+      );
+    } catch (e) {
+      _logger.e('Error reading seenReplyCounts: $e');
+      return {};
+    }
+  }
+
+  Future<void> markReplySeen(String commentId, int replyCount) async {
+    try {
+      final counts = Map<String, int>.from(seenReplyCounts);
+      counts[commentId] = replyCount;
+      await _box?.put('seenReplyCounts', counts);
+    } catch (e) {
+      _logger.e('Error writing seenReplyCounts: $e');
+    }
+  }
+
+  // ── 週次アクティビティログ（マイページの「今週の活動」ダイジェスト用）──
+  // 各アクションの発生日時を軽量に記録し、直近7日間の件数だけを集計する。
+  // 無限に増え続けないよう、末尾から一定件数だけを保持する。
+  static const _maxActivityLogEntries = 500;
+
+  Future<void> _logActivity(String type) async {
+    try {
+      final raw =
+          _box?.get('activityLog', defaultValue: const <String>[]) as List?;
+      final log = (raw ?? const <String>[]).cast<String>().toList();
+      log.add('$type|${DateTime.now().toIso8601String()}');
+      if (log.length > _maxActivityLogEntries) {
+        log.removeRange(0, log.length - _maxActivityLogEntries);
+      }
+      await _box?.put('activityLog', log);
+    } catch (e) {
+      _logger.e('Error logging activity: $e');
+    }
+  }
+
+  /// 直近7日間の、種類（vote/comment/quiz）ごとの活動件数
+  Map<String, int> get weeklyActivityCounts {
+    try {
+      final raw =
+          _box?.get('activityLog', defaultValue: const <String>[]) as List?;
+      final log = (raw ?? const <String>[]).cast<String>();
+      final cutoff = DateTime.now().subtract(const Duration(days: 7));
+      final counts = <String, int>{};
+      for (final entry in log) {
+        final parts = entry.split('|');
+        if (parts.length != 2) continue;
+        final timestamp = DateTime.tryParse(parts[1]);
+        if (timestamp == null || timestamp.isBefore(cutoff)) continue;
+        counts[parts[0]] = (counts[parts[0]] ?? 0) + 1;
+      }
+      return counts;
+    } catch (e) {
+      _logger.e('Error reading weeklyActivityCounts: $e');
+      return {};
     }
   }
 

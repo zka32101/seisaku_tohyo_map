@@ -17,6 +17,7 @@ import '../widgets/prefecture_picker.dart';
 import 'about_screen.dart';
 import 'challenge_detail_screen.dart';
 import 'interest_setup_screen.dart';
+import 'vote_memo_journal_screen.dart';
 
 class MyPageScreen extends ConsumerWidget {
   const MyPageScreen({super.key});
@@ -39,6 +40,8 @@ class MyPageScreen extends ConsumerWidget {
         children: [
           _StreakCard(stats: stats),
           const SizedBox(height: AppSpacing.md),
+          const _ReplyNotificationBanner(),
+          const _WeeklyDigestCard(),
           _PrefectureSettingRow(
             selected: selectedPrefecture,
             onTap: () async {
@@ -80,6 +83,46 @@ class MyPageScreen extends ConsumerWidget {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text('興味分野を編集', style: TextStyle(fontSize: 13)),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: AppColors.textMuted,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Material(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.badge),
+              onTap: () => context.pushScreenWithTransition(
+                const VoteMemoJournalScreen(),
+                screenName: 'VoteMemoJournal',
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.menu_book_outlined,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text('投票の記録を見る', style: TextStyle(fontSize: 13)),
                     ),
                     Icon(
                       Icons.chevron_right,
@@ -415,6 +458,124 @@ class _ThemeModeSettingRow extends ConsumerWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 自分のコメントに新しい返信が付いていないか確認し、件数バッジで知らせる。
+/// タップすると全て確認済みにする（返信元のコメントへ個別に飛ぶ仕組みは無いため、
+/// 通知に気づいたらコメントした課題を見に行ってもらう形にしている）。
+class _ReplyNotificationBanner extends ConsumerWidget {
+  const _ReplyNotificationBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unseenAsync = ref.watch(myUnseenReplyCountProvider);
+    final unseen = unseenAsync.valueOrNull ?? 0;
+    if (unseen == 0) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Material(
+        color: AppColors.primaryLight,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          onTap: () async {
+            await markAllRepliesSeen(ref);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                const Icon(Icons.forum, color: AppColors.primary, size: 20),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'あなたのコメントに$unseen件の新しい返信があります',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                const Text(
+                  '確認済みにする',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 直近7日間の活動（投票・コメント・クイズ）をまとめて振り返れるダイジェストカード。
+/// 継続利用の動機付けのため、ストリークカードの近くに表示する。
+class _WeeklyDigestCard extends StatelessWidget {
+  const _WeeklyDigestCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final counts = ActivityStore().weeklyActivityCounts;
+    final voteCount = counts['vote'] ?? 0;
+    final commentCount = counts['comment'] ?? 0;
+    final quizCount = counts['quiz'] ?? 0;
+    final total = voteCount + commentCount + quizCount;
+    if (total == 0) return const SizedBox.shrink();
+
+    final parts = [
+      if (voteCount > 0) '投票 $voteCount回',
+      if (commentCount > 0) 'コメント $commentCount件',
+      if (quizCount > 0) 'クイズ $quizCount回',
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_outlined,
+              size: 18,
+              color: AppColors.textSecondary,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '今週の活動',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                  Text(
+                    parts.join(' ・ '),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
