@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'infrastructure/local_storage/activity_store.dart';
 import 'infrastructure/notifications/notification_service.dart';
+import 'infrastructure/providers/user_preferences_provider.dart';
 import 'presentation/screens/content_policy_screen.dart';
 import 'presentation/screens/macro_dashboard_screen.dart';
 import 'presentation/theme/app_theme.dart';
@@ -20,14 +21,14 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
@@ -36,11 +37,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = themeModeFromString(
+      ref.watch(themeModeProvider).valueOrNull,
+    );
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: '政策投票マップ',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       home: const _AppGate(),
     );
   }

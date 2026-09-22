@@ -114,10 +114,35 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
       challenge.id,
     ).isNotEmpty;
 
+    final isFollowed = ActivityStore().followedChallengeIds.contains(
+      challenge.id,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(challenge.name),
         actions: [
+          IconButton(
+            icon: Icon(
+              isFollowed
+                  ? Icons.notifications_active
+                  : Icons.notifications_none,
+            ),
+            tooltip: isFollowed ? 'フォロー中（タップで解除）' : 'この課題をフォローする',
+            onPressed: () async {
+              await ActivityStore().toggleFollowedChallenge(challenge.id);
+              if (!context.mounted) return;
+              setState(() {});
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isFollowed ? 'フォローを解除しました' : 'フォローしました。マイページで動きを確認できます',
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.menu_book_outlined),
             tooltip: '用語集',
@@ -1774,12 +1799,25 @@ class _CommentSection extends ConsumerStatefulWidget {
 
 class _CommentSectionState extends ConsumerState<_CommentSection> {
   final _controller = TextEditingController();
+  final _focusNode = FocusNode();
   bool _posting = false;
+  // 返信中のコメント（nullならトップレベルへの新規投稿）
+  Comment? _replyingTo;
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _startReplyTo(Comment comment) {
+    setState(() => _replyingTo = comment);
+    _focusNode.requestFocus();
+  }
+
+  void _cancelReply() {
+    setState(() => _replyingTo = null);
   }
 
   Future<void> _post() async {
@@ -1794,12 +1832,20 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
       return;
     }
 
+    final parentId = _replyingTo?.id;
     setState(() => _posting = true);
     final result = await ref.read(
-      postCommentProvider((challengeId: widget.challengeId, text: text)).future,
+      postCommentProvider((
+        challengeId: widget.challengeId,
+        text: text,
+        parentId: parentId,
+      )).future,
     );
     if (!mounted) return;
-    setState(() => _posting = false);
+    setState(() {
+      _posting = false;
+      _replyingTo = null;
+    });
 
     if (result) {
       AnalyticsService().logCommentPosted(challengeId: widget.challengeId);
@@ -1826,14 +1872,49 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_replyingTo != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              children: [
+                const Icon(Icons.reply, size: 14, color: AppColors.textMuted),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    '「${_replyingTo!.text}」に返信',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _cancelReply,
+                  child: const Text(
+                    'キャンセル',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         Row(
           children: [
             Expanded(
               child: TextField(
                 controller: _controller,
+                focusNode: _focusNode,
                 maxLength: 140,
-                decoration: const InputDecoration(
-                  hintText: 'この課題について思うことを一言...',
+                decoration: InputDecoration(
+                  hintText: _replyingTo != null
+                      ? '返信を入力...'
+                      : 'この課題について思うことを一言...',
                   isDense: true,
                   counterText: '',
                 ),
@@ -1895,20 +1976,33 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
               );
             }
             final blockedIds = ref.watch(blockedUserIdsProvider);
-            // いいねが多い順→新しい順で並べ、人気のコメントが埋もれないようにする
-            final sorted =
-                [...comments.where((c) => !blockedIds.contains(c.userId))]
-                  ..sort((a, b) {
-                    final byLikes = b.likeCount.compareTo(a.likeCount);
-                    if (byLikes != 0) return byLikes;
-                    return b.createdAt.compareTo(a.createdAt);
-                  });
+            final visible = comments
+                .where((c) => !blockedIds.contains(c.userId))
+                .toList();
+            // トップレベルコメントは、いいねが多い順→新しい順で並べ、
+            // 人気のコメントが埋もれないようにする
+            final topLevel = visible.where((c) => !c.isReply).toList()
+              ..sort((a, b) {
+                final byLikes = b.likeCount.compareTo(a.likeCount);
+                if (byLikes != 0) return byLikes;
+                return b.createdAt.compareTo(a.createdAt);
+              });
+            // 返信は投稿順（古い順）で親コメントにぶら下げる
+            final repliesByParent = <String, List<Comment>>{};
+            for (final c in visible.where((c) => c.isReply)) {
+              (repliesByParent[c.parentId!] ??= []).add(c);
+            }
+            for (final replies in repliesByParent.values) {
+              replies.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+            }
             return Column(
-              children: sorted
+              children: topLevel
                   .map(
                     (c) => _CommentTile(
                       comment: c,
                       challengeId: widget.challengeId,
+                      replies: repliesByParent[c.id] ?? const [],
+                      onReply: () => _startReplyTo(c),
                     ),
                   )
                   .toList(),
@@ -1923,8 +2017,17 @@ class _CommentSectionState extends ConsumerState<_CommentSection> {
 class _CommentTile extends ConsumerWidget {
   final Comment comment;
   final String challengeId;
+  final List<Comment> replies;
+  final VoidCallback? onReply;
+  final bool isNested;
 
-  const _CommentTile({required this.comment, required this.challengeId});
+  const _CommentTile({
+    required this.comment,
+    required this.challengeId,
+    this.replies = const [],
+    this.onReply,
+    this.isNested = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1932,9 +2035,34 @@ class _CommentTile extends ConsumerWidget {
     final liked = likedIds.contains(comment.id);
     final isPopular = comment.likeCount >= 3;
 
+    return Padding(
+      padding: EdgeInsets.only(
+        left: isNested ? AppSpacing.lg : 0,
+        bottom: AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBubble(context, ref, liked, isPopular),
+          for (final reply in replies)
+            _CommentTile(
+              comment: reply,
+              challengeId: challengeId,
+              isNested: true,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBubble(
+    BuildContext context,
+    WidgetRef ref,
+    bool liked,
+    bool isPopular,
+  ) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: isPopular ? AppColors.primaryLight : AppColors.background,
@@ -2012,6 +2140,40 @@ class _CommentTile extends ConsumerWidget {
                   ),
                 ),
               ),
+              if (onReply != null) ...[
+                const SizedBox(width: AppSpacing.md),
+                InkWell(
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                  onTap: onReply,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.reply,
+                          size: 14,
+                          color: AppColors.textMuted,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          comment.replyCount > 0
+                              ? '返信 ${comment.replyCount}'
+                              : '返信',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
               UgcActionMenu(
                 contentType: 'comment',

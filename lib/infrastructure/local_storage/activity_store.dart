@@ -243,6 +243,49 @@ class ActivityStore {
     }
   }
 
+  // ── 投票理由メモ（課題ID → 自分だけが見られる一言メモ）──
+  // 後で自分の考えの変化を振り返れるように、賛同した課題ごとに任意のメモを残せる。
+  Map<String, String> get voteMemos {
+    try {
+      final raw = _box?.get('voteMemos', defaultValue: const {}) as Map?;
+      return (raw ?? const {}).map(
+        (key, value) => MapEntry(key.toString(), value.toString()),
+      );
+    } catch (e) {
+      _logger.e('Error reading voteMemos: $e');
+      return {};
+    }
+  }
+
+  String? voteMemoFor(String challengeId) => voteMemos[challengeId];
+
+  Future<void> setVoteMemo(String challengeId, String memo) async {
+    try {
+      final memos = Map<String, String>.from(voteMemos);
+      if (memo.trim().isEmpty) {
+        memos.remove(challengeId);
+      } else {
+        memos[challengeId] = memo.trim();
+      }
+      await _box?.put('voteMemos', memos);
+    } catch (e) {
+      _logger.e('Error writing voteMemos: $e');
+    }
+  }
+
+  // ── フォロー中の課題（国会・協力団体の動きを追いたい課題）──
+  Set<String> get followedChallengeIds => _stringSet('followedChallengeIds');
+
+  Future<void> toggleFollowedChallenge(String challengeId) async {
+    final current = followedChallengeIds;
+    if (current.contains(challengeId)) {
+      final updated = current..remove(challengeId);
+      await _box?.put('followedChallengeIds', updated.toList());
+    } else {
+      await _addToSet('followedChallengeIds', challengeId);
+    }
+  }
+
   // 実績バッジ判定用のスナップショット（マイページ表示・新規解除の差分検出の両方に使う）
   ActivityStats currentStats() {
     return ActivityStats(

@@ -7,11 +7,13 @@ import '../../application/usecases/load_agency_contacts.dart';
 import '../../domain/entities/challenge.dart';
 import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
+import '../../infrastructure/providers/user_preferences_provider.dart';
 import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/achievement_unlock_dialog.dart';
 import '../widgets/glossary_text.dart';
 import '../widgets/offline_banner.dart';
+import 'advanced_search_screen.dart';
 import 'age_input_screen.dart';
 import 'challenge_detail_screen.dart';
 import 'glossary_screen.dart';
@@ -89,7 +91,13 @@ class ChallengeListScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('エラー: $err')),
         data: (challenges) {
-          final recommended = _recommend(challenges, votedIds);
+          final selectedInterests =
+              ref.watch(selectedInterestsProvider).valueOrNull ?? const [];
+          final recommended = _recommend(
+            challenges,
+            votedIds,
+            selectedInterests,
+          );
           final isSearching = searchQuery.trim().isNotEmpty;
           var filtered = selectedCategory == null
               ? challenges
@@ -106,7 +114,33 @@ class ChallengeListScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.md),
             children: [
               const OfflineBanner(),
-              const _SearchField(),
+              Row(
+                children: [
+                  const Expanded(child: _SearchField()),
+                  const SizedBox(width: AppSpacing.sm),
+                  Material(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.badge),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(AppRadius.badge),
+                      onTap: () {
+                        context.pushScreenWithTransition(
+                          const AdvancedSearchScreen(),
+                          screenName: 'AdvancedSearch',
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(AppRadius.badge),
+                        ),
+                        child: const Icon(Icons.tune, size: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: AppSpacing.md),
               Material(
                 color: AppColors.successLight,
@@ -215,20 +249,31 @@ class ChallengeListScreen extends ConsumerWidget {
   }
 
   // 投票済み課題のカテゴリに近い、未投票の課題を投票数順におすすめする
-  List<Challenge> _recommend(List<Challenge> challenges, Set<String> votedIds) {
-    if (votedIds.isEmpty) return [];
-
+  List<Challenge> _recommend(
+    List<Challenge> challenges,
+    Set<String> votedIds,
+    List<String> selectedInterests,
+  ) {
+    // 投票済みの課題があれば、そのカテゴリを最優先で推薦する
     final votedCategories = challenges
         .where((c) => votedIds.contains(c.id))
         .map((c) => c.category)
         .toSet();
+
+    // まだ投票していない場合は、オンボーディングで選んだ興味分野を代わりに使う
+    // （コールドスタート対策）
+    final targetCategories = votedCategories.isNotEmpty
+        ? votedCategories
+        : selectedInterests.toSet();
+
+    if (targetCategories.isEmpty) return [];
 
     final candidates =
         challenges
             .where(
               (c) =>
                   !votedIds.contains(c.id) &&
-                  votedCategories.contains(c.category),
+                  targetCategories.contains(c.category),
             )
             .toList()
           ..sort((a, b) => b.voteCount.compareTo(a.voteCount));
