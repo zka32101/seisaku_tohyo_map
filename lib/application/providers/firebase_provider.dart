@@ -103,9 +103,12 @@ final myUnseenReplyCountProvider = FutureProvider<int>((ref) async {
 
   final service = ref.watch(firebaseServiceProvider);
   final seenCounts = ActivityStore().seenReplyCounts;
+  // 各課題のコメント取得は互いに独立しているため、直列にawaitせず並列に取得する
+  final commentLists = await Future.wait(
+    challengeIds.map((challengeId) => service.getComments(challengeId)),
+  );
   var unseen = 0;
-  for (final challengeId in challengeIds) {
-    final comments = await service.getComments(challengeId);
+  for (final comments in commentLists) {
     for (final comment in comments) {
       if (comment.userId != myUserId || comment.replyCount == 0) continue;
       final seen = seenCounts[comment.id] ?? 0;
@@ -123,8 +126,11 @@ Future<void> markAllRepliesSeen(WidgetRef ref) async {
   if (myUserId == null) return;
 
   final service = ref.read(firebaseServiceProvider);
-  for (final challengeId in ActivityStore().commentedChallengeIds) {
-    final comments = await service.getComments(challengeId);
+  final challengeIds = ActivityStore().commentedChallengeIds;
+  final commentLists = await Future.wait(
+    challengeIds.map((challengeId) => service.getComments(challengeId)),
+  );
+  for (final comments in commentLists) {
     for (final comment in comments) {
       if (comment.userId == myUserId && comment.replyCount > 0) {
         await ActivityStore().markReplySeen(comment.id, comment.replyCount);

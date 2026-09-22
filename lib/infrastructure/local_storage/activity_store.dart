@@ -147,8 +147,11 @@ class ActivityStore {
       }
     } catch (e) {
       _logger.e('Error recording vote streak: $e');
+    } finally {
+      // ストリーク判定が早期returnする（同日2回目以降の投票）場合でも、
+      // 週次ダイジェスト用のログは投票のたびに必ず記録する
+      await _logActivity('vote');
     }
-    await _logActivity('vote');
   }
 
   /// 表示用の現在の連続投票日数。
