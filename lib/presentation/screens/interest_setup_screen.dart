@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nihon_future_map/infrastructure/providers/user_preferences_provider.dart';
+import 'package:nihon_future_map/presentation/theme/app_theme.dart';
 
-/// Onboarding screen for user interest field selection
+/// 興味分野の設定画面。オンボーディング時だけでなく、マイページからいつでも
+/// 編集できる。ここで選んだカテゴリは、課題一覧のおすすめ表示（まだ何も
+/// 投票していないユーザー向けの初期表示）に使われる。
 class InterestSetupScreen extends ConsumerWidget {
   const InterestSetupScreen({super.key});
 
+  // Challenge.category と同じ内部コードを使う（表示名はAppColors.categoryLabelに揃える）
   static const List<String> interestCategories = [
-    '経済・財政',
-    '福祉・医療',
-    '人口・地域',
-    '環境・エネルギー',
-    '政治構造',
-    '教育・科学',
-    '防衛・外交',
-    'その他',
+    'economy',
+    'welfare',
+    'demographic',
+    'politics',
+    'debt',
+    'structural',
   ];
 
   @override
@@ -49,10 +51,15 @@ class InterestSetupScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final category = interestCategories[index];
               final isSelected = selectedInterests.contains(category);
+              final color = AppColors.categoryColor(category);
 
               return Card(
                 child: CheckboxListTile(
-                  title: Text(category),
+                  secondary: Icon(
+                    AppColors.categoryIcon(category),
+                    color: color,
+                  ),
+                  title: Text(AppColors.categoryLabel(category)),
                   value: isSelected,
                   onChanged: (value) {
                     ref
@@ -73,14 +80,10 @@ class InterestSetupScreen extends ConsumerWidget {
           child: SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: selectedInterests.isEmpty
-                  ? null
-                  : () {
-                      Navigator.pop(context);
-                    },
+              onPressed: () => Navigator.pop(context),
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text('選択完了'),
+                child: Text('完了'),
               ),
             ),
           ),

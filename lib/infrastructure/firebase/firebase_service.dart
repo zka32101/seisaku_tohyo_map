@@ -1032,23 +1032,40 @@ class FirebaseService {
     ];
   }
 
-  // 課題へのコメントを投稿
+  // 課題へのコメントを投稿（parentIdを指定すると返信として投稿される）
   Future<bool> postComment(
     String userId,
     String challengeId,
-    String text,
-  ) async {
+    String text, {
+    String? parentId,
+  }) async {
     try {
+      final data = <String, dynamic>{
+        'text': text,
+        'likeCount': 0,
+        'userId': userId,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+      if (parentId != null) {
+        data['parentId'] = parentId;
+      }
+
       await _firestore
           .collection('challenges')
           .doc(challengeId)
           .collection('comments')
-          .add({
-            'text': text,
-            'likeCount': 0,
-            'userId': userId,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+          .add(data);
+
+      if (parentId != null) {
+        // 親コメントの返信数を更新（親ドキュメントは必ず存在するのでupdateで良い）
+        await _firestore
+            .collection('challenges')
+            .doc(challengeId)
+            .collection('comments')
+            .doc(parentId)
+            .update({'replyCount': FieldValue.increment(1)});
+      }
+
       _logger.i('Comment posted for challenge: $challengeId');
       return true;
     } catch (e) {
@@ -1154,6 +1171,8 @@ class FirebaseService {
           createdAt: timestamp?.toDate() ?? DateTime.now(),
           likeCount: data['likeCount'] ?? 0,
           userId: data['userId'] as String?,
+          parentId: data['parentId'] as String?,
+          replyCount: data['replyCount'] ?? 0,
         );
       }).toList();
     } catch (e) {

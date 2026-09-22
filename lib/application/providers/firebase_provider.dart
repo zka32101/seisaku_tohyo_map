@@ -67,12 +67,12 @@ final commentsProvider = FutureProvider.family<List<Comment>, String>((
   return await service.getComments(challengeId);
 });
 
-// コメント投稿
+// コメント投稿（parentIdを指定すると返信として投稿される）
 final postCommentProvider =
-    FutureProvider.family<bool, ({String challengeId, String text})>((
-      ref,
-      params,
-    ) async {
+    FutureProvider.family<
+      bool,
+      ({String challengeId, String text, String? parentId})
+    >((ref, params) async {
       final service = ref.watch(firebaseServiceProvider);
       // 匿名認証が完了する前に書き込むと Firestore ルールで拒否されるため、
       // vote/agree と同様にまず認証の完了を待つ
@@ -83,6 +83,7 @@ final postCommentProvider =
         userId,
         params.challengeId,
         params.text,
+        parentId: params.parentId,
       );
       if (result) {
         ref.read(commentsRefreshProvider.notifier).state++;
