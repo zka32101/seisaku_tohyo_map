@@ -543,6 +543,9 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
     _agreeCount = widget.challenge.agreeCount;
   }
 
+  int get _weeklyDelta =>
+      ActivityStore().weeklyAgreeDelta(widget.challenge.id, _agreeCount);
+
   Future<void> _onAgree() async {
     // 課題詳細画面など他画面で既に賛同済みの場合はここでも再度押せないようにする
     if (ref.read(agreedChallengeIdsProvider).contains(widget.challenge.id)) {
@@ -722,6 +725,17 @@ class _ChallengeCardState extends ConsumerState<_ChallengeCard> {
                   ),
                 ),
               ),
+              if (_weeklyDelta > 0) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '今週 +$_weeklyDelta件',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AppColors.pensionOrange,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
