@@ -38,14 +38,22 @@ final challengesProvider = FutureProvider<List<Challenge>>((ref) async {
   final challenges = FirebaseService.getMockChallenges();
   final service = ref.watch(firebaseServiceProvider);
   final realAgreeCounts = await service.getChallengeAgreeCounts();
-  if (realAgreeCounts.isEmpty) return challenges;
+  final merged = realAgreeCounts.isEmpty
+      ? challenges
+      : challenges
+            .map(
+              (c) => c.copyWith(
+                agreeCount: c.agreeCount + (realAgreeCounts[c.id] ?? 0),
+              ),
+            )
+            .toList();
 
-  return challenges
-      .map(
-        (c) =>
-            c.copyWith(agreeCount: c.agreeCount + (realAgreeCounts[c.id] ?? 0)),
-      )
-      .toList();
+  // 「今週+N件」表示用のスナップショットを、必要な時だけ（週1回）更新する
+  await ActivityStore().refreshAgreeCountSnapshotIfStale({
+    for (final c in merged) c.id: c.agreeCount,
+  });
+
+  return merged;
 });
 
 // このセッションで「これは問題」に賛同した課題ID（おすすめ機能に利用）
@@ -118,6 +126,25 @@ final myUnseenReplyCountProvider = FutureProvider<int>((ref) async {
     }
   }
   return unseen;
+});
+
+// 自分が投稿したコメント一覧（返信も含む）。「投票の記録」画面で投票メモと
+// 合わせて振り返れるタイムラインを作るために使う。
+final myCommentsTimelineProvider = FutureProvider<List<Comment>>((ref) async {
+  final myUserId = await ref.read(userIdProvider.future);
+  if (myUserId == null) return [];
+
+  final challengeIds = ActivityStore().commentedChallengeIds;
+  if (challengeIds.isEmpty) return [];
+
+  final service = ref.watch(firebaseServiceProvider);
+  final commentLists = await Future.wait(
+    challengeIds.map((challengeId) => service.getComments(challengeId)),
+  );
+  return commentLists
+      .expand((comments) => comments)
+      .where((c) => c.userId == myUserId)
+      .toList();
 });
 
 // 未読の返信をすべて「確認済み」にする（マイページのバッジをタップした時に呼ぶ）

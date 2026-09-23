@@ -8,14 +8,32 @@ import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import 'challenge_detail_screen.dart';
 
-/// これまでに書いた投票メモを新しい順に振り返れる「投票の記録」画面。
-/// メモは端末ローカル保存のため、他ユーザーには見えない自分だけの記録。
+enum _EntryType { memo, comment }
+
+class _JournalEntry {
+  final _EntryType type;
+  final String challengeId;
+  final String text;
+  final DateTime? timestamp;
+
+  const _JournalEntry({
+    required this.type,
+    required this.challengeId,
+    required this.text,
+    required this.timestamp,
+  });
+}
+
+/// これまでに書いた投票メモと投稿したコメントを、新しい順に振り返れる
+/// 「投票の記録」画面。メモは端末ローカル保存、コメントはFirestoreから
+/// 取得するが、いずれも自分だけの記録として一つのタイムラインにまとめる。
 class VoteMemoJournalScreen extends ConsumerWidget {
   const VoteMemoJournalScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final challengesAsync = ref.watch(challengesProvider);
+    final myCommentsAsync = ref.watch(myCommentsTimelineProvider);
     final memos = ActivityStore().voteMemos;
 
     return Scaffold(
@@ -26,12 +44,38 @@ class VoteMemoJournalScreen extends ConsumerWidget {
           child: Text('読み込めませんでした', style: TextStyle(fontSize: 12)),
         ),
         data: (challenges) {
-          if (memos.isEmpty) {
+          final myComments = myCommentsAsync.valueOrNull ?? const [];
+
+          final entries =
+              <_JournalEntry>[
+                for (final entry in memos.entries)
+                  _JournalEntry(
+                    type: _EntryType.memo,
+                    challengeId: entry.key,
+                    text: entry.value,
+                    timestamp: ActivityStore().voteMemoUpdatedAt(entry.key),
+                  ),
+                for (final comment in myComments)
+                  _JournalEntry(
+                    type: _EntryType.comment,
+                    challengeId: comment.challengeId,
+                    text: comment.text,
+                    timestamp: comment.createdAt,
+                  ),
+              ]..sort((a, b) {
+                if (a.timestamp == null && b.timestamp == null) return 0;
+                if (a.timestamp == null) return 1;
+                if (b.timestamp == null) return -1;
+                return b.timestamp!.compareTo(a.timestamp!);
+              });
+
+          if (entries.isEmpty) {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(AppSpacing.lg),
                 child: Text(
-                  'まだメモがありません。\n賛同した課題の一覧で📝アイコンから\n一言メモを残せます',
+                  'まだ記録がありません。\n賛同した課題の一覧で📝アイコンからメモを残したり、\n'
+                  '課題にコメントすると、ここで振り返れます',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 ),
@@ -40,28 +84,15 @@ class VoteMemoJournalScreen extends ConsumerWidget {
           }
 
           final challengeById = {for (final c in challenges) c.id: c};
-          final entries = memos.keys.toList()
-            ..sort((a, b) {
-              final aTime = ActivityStore().voteMemoUpdatedAt(a);
-              final bTime = ActivityStore().voteMemoUpdatedAt(b);
-              if (aTime == null && bTime == null) return 0;
-              if (aTime == null) return 1;
-              if (bTime == null) return -1;
-              return bTime.compareTo(aTime);
-            });
 
           return ListView.builder(
             padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: entries.length,
             itemBuilder: (context, index) {
-              final challengeId = entries[index];
-              final challenge = challengeById[challengeId];
-              final memo = memos[challengeId]!;
-              final updatedAt = ActivityStore().voteMemoUpdatedAt(challengeId);
-              return _MemoEntryCard(
-                challenge: challenge,
-                memo: memo,
-                updatedAt: updatedAt,
+              final entry = entries[index];
+              return _JournalEntryCard(
+                entry: entry,
+                challenge: challengeById[entry.challengeId],
               );
             },
           );
@@ -71,16 +102,11 @@ class VoteMemoJournalScreen extends ConsumerWidget {
   }
 }
 
-class _MemoEntryCard extends StatelessWidget {
+class _JournalEntryCard extends StatelessWidget {
+  final _JournalEntry entry;
   final Challenge? challenge;
-  final String memo;
-  final DateTime? updatedAt;
 
-  const _MemoEntryCard({
-    required this.challenge,
-    required this.memo,
-    required this.updatedAt,
-  });
+  const _JournalEntryCard({required this.entry, required this.challenge});
 
   static const _months = [
     '',
@@ -105,6 +131,7 @@ class _MemoEntryCard extends StatelessWidget {
     final color = challenge == null
         ? AppColors.textMuted
         : AppColors.categoryColor(challenge!.category);
+    final isMemo = entry.type == _EntryType.memo;
 
     return Material(
       color: AppColors.surface,
@@ -129,6 +156,21 @@ class _MemoEntryCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  Icon(
+                    isMemo ? Icons.sticky_note_2 : Icons.forum,
+                    size: 13,
+                    color: isMemo ? AppColors.primary : AppColors.success,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isMemo ? 'メモ' : 'コメント',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: isMemo ? AppColors.primary : AppColors.success,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   if (challenge != null)
                     Icon(
                       AppColors.categoryIcon(challenge!.category),
@@ -143,11 +185,13 @@ class _MemoEntryCard extends StatelessWidget {
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (updatedAt != null)
+                  if (entry.timestamp != null)
                     Text(
-                      _formatDate(updatedAt!),
+                      _formatDate(entry.timestamp!),
                       style: const TextStyle(
                         fontSize: 10,
                         color: AppColors.textMuted,
@@ -157,11 +201,11 @@ class _MemoEntryCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                memo,
-                style: const TextStyle(
+                entry.text,
+                style: TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
-                  fontStyle: FontStyle.italic,
+                  fontStyle: isMemo ? FontStyle.italic : FontStyle.normal,
                   height: 1.4,
                 ),
               ),

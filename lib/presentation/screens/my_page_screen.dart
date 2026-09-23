@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../application/providers/firebase_provider.dart';
 import '../../application/providers/proposal_provider.dart';
@@ -9,11 +10,14 @@ import '../../application/usecases/load_issue_advocates.dart';
 import '../../domain/entities/achievement.dart';
 import '../../domain/entities/activity_stats.dart';
 import '../../domain/entities/challenge.dart';
+import '../../domain/entities/user_proposal.dart';
+import '../../infrastructure/analytics/analytics_service.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
 import '../../infrastructure/providers/user_preferences_provider.dart';
 import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/prefecture_picker.dart';
+import '../widgets/submission_status_badge.dart';
 import 'about_screen.dart';
 import 'challenge_detail_screen.dart';
 import 'interest_setup_screen.dart';
@@ -617,6 +621,19 @@ class _VoiceDeliveredSection extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
+            const Spacer(),
+            InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.badge),
+              onTap: () => _share(delivered),
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Icon(
+                  Icons.ios_share,
+                  size: 16,
+                  color: AppColors.success,
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -633,6 +650,19 @@ class _VoiceDeliveredSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _share(List<Challenge> delivered) async {
+    final lines = delivered.map((c) => '・${c.name}').join('\n');
+    final text =
+        '政策投票マップで賛同した課題のうち、${delivered.length}件で実際に国会審議や'
+        '協力団体の動きがありました。\n\n$lines\n\nあなたも声を届けてみませんか？';
+    try {
+      await Share.share(text);
+      AnalyticsService().logContentShared(contentType: 'voice_delivered');
+    } catch (_) {
+      // シェアシートのキャンセル等は無視する
+    }
   }
 }
 
@@ -1107,21 +1137,30 @@ class _MySubmittedProposals extends ConsumerWidget {
                     border: Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.circular(AppRadius.badge),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          p.title,
-                          style: const TextStyle(fontSize: 13),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              p.title,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          Text(
+                            '${p.voteCount}票',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${p.voteCount}票',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
+                      if (p.submissionStatus != SubmissionStatus.none) ...[
+                        const SizedBox(height: 6),
+                        SubmissionStatusBadge(proposal: p),
+                      ],
                     ],
                   ),
                 ),

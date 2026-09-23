@@ -8,6 +8,7 @@ import '../../domain/entities/user_proposal.dart';
 import '../../infrastructure/local_storage/activity_store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/achievement_unlock_dialog.dart';
+import '../widgets/submission_status_badge.dart';
 import '../widgets/ugc_action_menu.dart';
 import 'submit_proposal_screen.dart';
 
@@ -227,7 +228,7 @@ class _ProposalCardState extends ConsumerState<_ProposalCard> {
           ),
           if (widget.proposal.submissionStatus != SubmissionStatus.none) ...[
             const SizedBox(height: AppSpacing.sm),
-            _SubmissionStatusBadge(proposal: widget.proposal),
+            SubmissionStatusBadge(proposal: widget.proposal),
           ],
           const SizedBox(height: AppSpacing.sm),
           SizedBox(
@@ -250,67 +251,6 @@ class _ProposalCardState extends ConsumerState<_ProposalCard> {
                       ),
                     )
                   : Text(voted ? '投票済み ✓' : 'この提案に投票する'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SubmissionStatusBadge extends StatelessWidget {
-  final UserProposal proposal;
-
-  const _SubmissionStatusBadge({required this.proposal});
-
-  static const _statusColors = {
-    SubmissionStatus.submitted: AppColors.primary,
-    SubmissionStatus.responded: AppColors.pensionOrange,
-    SubmissionStatus.adopted: AppColors.success,
-    SubmissionStatus.declined: AppColors.textMuted,
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final color =
-        _statusColors[proposal.submissionStatus] ?? AppColors.textMuted;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.badge),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.campaign, size: 14, color: color),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  proposal.submissionStatus.label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: color,
-                  ),
-                ),
-                if (proposal.submissionNote != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    proposal.submissionNote!,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ],
             ),
           ),
         ],

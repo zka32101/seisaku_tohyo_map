@@ -356,6 +356,65 @@ class ActivityStore {
     }
   }
 
+  // ── 今週の賛同数スナップショット（課題カードの「今週+N件」表示用）──
+  // 賛同数の実数（Firestoreに書き込まれた値）は増える一方なので、7日ごとに
+  // その時点の値を保存しておき、現在値との差分を「今週の伸び」として表示する。
+  Map<String, int> get _agreeCountSnapshot {
+    try {
+      final raw =
+          _box?.get('agreeCountSnapshot', defaultValue: const {}) as Map?;
+      return (raw ?? const {}).map(
+        (key, value) => MapEntry(key.toString(), value as int? ?? 0),
+      );
+    } catch (e) {
+      _logger.e('Error reading agreeCountSnapshot: $e');
+      return {};
+    }
+  }
+
+  DateTime? get _agreeCountSnapshotDate {
+    try {
+      final raw = _box?.get('agreeCountSnapshotDate') as String?;
+      return raw == null ? null : DateTime.tryParse(raw);
+    } catch (e) {
+      _logger.e('Error reading agreeCountSnapshotDate: $e');
+      return null;
+    }
+  }
+
+  /// スナップショットが無い、または7日以上前の場合、現在の賛同数で更新する。
+  /// 課題一覧を開くたびに呼び出し、以降1週間はその時点の値を基準に
+  /// 「今週+N件」の差分を計算する。
+  Future<void> refreshAgreeCountSnapshotIfStale(
+    Map<String, int> currentCounts,
+  ) async {
+    final snapshotDate = _agreeCountSnapshotDate;
+    final isStale =
+        snapshotDate == null ||
+        DateTime.now().difference(snapshotDate).inDays >= 7;
+    if (!isStale) return;
+    try {
+      await _box?.put('agreeCountSnapshot', currentCounts);
+      await _box?.put(
+        'agreeCountSnapshotDate',
+        DateTime.now().toIso8601String(),
+      );
+    } catch (e) {
+      _logger.e('Error writing agreeCountSnapshot: $e');
+    }
+  }
+
+  /// 今週の賛同数の伸び（スナップショット時点からの差分）。
+  /// スナップショット時点でまだ存在しなかった課題（新規追加など）は
+  /// 差分の基準が無いため0を返す。
+  int weeklyAgreeDelta(String challengeId, int currentCount) {
+    final snapshot = _agreeCountSnapshot;
+    final baseline = snapshot[challengeId];
+    if (baseline == null) return 0;
+    final delta = currentCount - baseline;
+    return delta > 0 ? delta : 0;
+  }
+
   // ── 週次アクティビティログ（マイページの「今週の活動」ダイジェスト用）──
   // 各アクションの発生日時を軽量に記録し、直近7日間の件数だけを集計する。
   // 無限に増え続けないよう、末尾から一定件数だけを保持する。
