@@ -55,9 +55,13 @@ class PartyMatchScreen extends ConsumerWidget {
                   ),
                 )
               else
-                ...results.map(
-                  (r) =>
-                      _PartyMatchCard(result: r, challengeById: challengeById),
+                ...results.asMap().entries.map(
+                  (entry) => _PartyMatchCard(
+                    result: entry.value,
+                    challengeById: challengeById,
+                    isTopMatch:
+                        entry.key == 0 && entry.value.comparableCount > 0,
+                  ),
                 ),
             ],
           );
@@ -111,22 +115,37 @@ class _DisclaimerBanner extends StatelessWidget {
 class _PartyMatchCard extends StatelessWidget {
   final PartyMatchResult result;
   final Map<String, Challenge> challengeById;
+  final bool isTopMatch;
 
-  const _PartyMatchCard({required this.result, required this.challengeById});
+  const _PartyMatchCard({
+    required this.result,
+    required this.challengeById,
+    this.isTopMatch = false,
+  });
+
+  /// 一致度の高さに応じて色を変え、一覧をぱっと見で把握しやすくする。
+  static Color _tierColor(double matchRate) {
+    if (matchRate >= 0.7) return AppColors.success;
+    if (matchRate >= 0.4) return AppColors.primary;
+    return AppColors.textMuted;
+  }
 
   @override
   Widget build(BuildContext context) {
     final percent = (result.matchRate * 100).round();
     final color = result.comparableCount == 0
         ? AppColors.textMuted
-        : AppColors.primary;
+        : _tierColor(result.matchRate);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: isTopMatch ? AppColors.success : AppColors.border,
+          width: isTopMatch ? 1.5 : 1,
+        ),
       ),
       child: ExpansionTile(
         enabled: result.comparableCount > 0,
@@ -142,6 +161,14 @@ class _PartyMatchCard extends StatelessWidget {
         ),
         title: Row(
           children: [
+            if (isTopMatch) ...[
+              const Icon(
+                Icons.emoji_events,
+                size: 16,
+                color: AppColors.success,
+              ),
+              const SizedBox(width: 4),
+            ],
             Expanded(
               child: Text(
                 result.partyName,
