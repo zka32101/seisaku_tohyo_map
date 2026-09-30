@@ -100,6 +100,35 @@ class ActivityStore {
     await _recordVoteActivity();
   }
 
+  // ── 選んだ対策案そのもの（課題ID → 対策案ID）──
+  // policyVotedChallengeIdsは「投票した」という事実のみを記録するため、
+  // 政党との政策一致度を計算するには、実際に選んだ対策案IDが別途必要になる。
+  Map<String, String> get selectedPolicyOptions {
+    try {
+      final raw =
+          _box?.get('selectedPolicyOptions', defaultValue: const {}) as Map?;
+      return (raw ?? const {}).map(
+        (key, value) => MapEntry(key.toString(), value.toString()),
+      );
+    } catch (e) {
+      _logger.e('Error reading selectedPolicyOptions: $e');
+      return {};
+    }
+  }
+
+  Future<void> setSelectedPolicyOption(
+    String challengeId,
+    String optionId,
+  ) async {
+    try {
+      final options = Map<String, String>.from(selectedPolicyOptions);
+      options[challengeId] = optionId;
+      await _box?.put('selectedPolicyOptions', options);
+    } catch (e) {
+      _logger.e('Error writing selectedPolicyOptions: $e');
+    }
+  }
+
   // ── 投票ストリーク（連続投票日数）──
   //
   // 「課題」「対策案」いずれかへの投票を1日1回以上行った日を「投票した日」として
