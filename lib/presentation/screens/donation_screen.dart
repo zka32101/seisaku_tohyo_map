@@ -116,20 +116,22 @@ class _DonationScreenState extends State<DonationScreen> {
                   color: AppColors.primaryLight,
                   borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.block_flipped,
                           size: 16,
                           color: AppColors.primary,
                         ),
-                        SizedBox(width: 6),
+                        const SizedBox(width: 6),
                         Text(
-                          'このアプリに広告はありません',
-                          style: TextStyle(
+                          ActivityStore().donationCount > 0
+                              ? '広告は表示されません'
+                              : '一度のご寄付で広告が非表示になります',
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                             color: AppColors.primary,
@@ -137,12 +139,14 @@ class _DonationScreenState extends State<DonationScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     Text(
-                      '広告収益に頼らず、みなさまからの寄付で開発・運営を続けています。'
-                      '社会課題に向き合うこのアプリを気に入っていただけたら、'
-                      '応援いただけると励みになります。',
-                      style: TextStyle(fontSize: 13, height: 1.6),
+                      ActivityStore().donationCount > 0
+                          ? 'ご支援ありがとうございます。これからも広告なしでご利用いただけます。'
+                          : '金額を問わず、一度でもご寄付いただくと以降広告が表示されなくなります。'
+                                '社会課題に向き合うこのアプリを気に入っていただけたら、'
+                                '応援いただけると励みになります。',
+                      style: const TextStyle(fontSize: 13, height: 1.6),
                     ),
                   ],
                 ),

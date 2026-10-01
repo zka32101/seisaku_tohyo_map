@@ -1379,6 +1379,11 @@ class _PolicyOptionCardState extends ConsumerState<_PolicyOptionCard> {
       final newlyUnlocked = await CheckNewAchievements.call(
         () => ActivityStore().addPolicyVote(widget.challengeId),
       );
+      // 政党との政策一致度の計算に使うため、選んだ対策案そのものも記録する
+      await ActivityStore().setSelectedPolicyOption(
+        widget.challengeId,
+        widget.option.id,
+      );
       if (newlyUnlocked.isNotEmpty && mounted) {
         showAchievementUnlockDialogs(context, newlyUnlocked);
       }

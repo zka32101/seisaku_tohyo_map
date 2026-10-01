@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
+import 'infrastructure/ads/ad_service.dart';
 import 'infrastructure/local_storage/activity_store.dart';
 import 'infrastructure/notifications/notification_service.dart';
 import 'infrastructure/providers/user_preferences_provider.dart';
@@ -17,6 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ActivityStore.init();
+  await AdService.initialize();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   runApp(const ProviderScope(child: MyApp()));
 }

@@ -65,6 +65,13 @@ dependencies:
   # 寄付機能（Google Play課金）
   in_app_purchase: ^3.2.0
 
+  # 広告（寄付すると非表示になる）
+  # 9.0.0以降はAdPreloader機能が追加のPrivateヘッダー（GoogleMobileAds_Beta.h）を
+  # 直接#importしており、"Include of non-modular header inside framework module
+  # 'google_mobile_ads.FLTAd_Internal'"というiOSビルドエラーになる既知の問題がある
+  # （この機能自体はバナー広告のみを使う本アプリでは不要）。修正されるまで9.0.0未満に固定する。
+  google_mobile_ads: ">=5.1.0 <9.0.0"
+
   # Local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0

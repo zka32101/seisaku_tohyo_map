@@ -21,6 +21,7 @@ import '../widgets/submission_status_badge.dart';
 import 'about_screen.dart';
 import 'challenge_detail_screen.dart';
 import 'interest_setup_screen.dart';
+import 'party_match_screen.dart';
 import 'vote_memo_journal_screen.dart';
 
 class MyPageScreen extends ConsumerWidget {
@@ -127,6 +128,49 @@ class MyPageScreen extends ConsumerWidget {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text('投票の記録を見る', style: TextStyle(fontSize: 13)),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: AppColors.textMuted,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Material(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.badge),
+              onTap: () => context.pushScreenWithTransition(
+                const PartyMatchScreen(),
+                screenName: 'PartyMatch',
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.balance_outlined,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '政党との政策一致度を見る',
+                        style: TextStyle(fontSize: 13),
+                      ),
                     ),
                     Icon(
                       Icons.chevron_right,

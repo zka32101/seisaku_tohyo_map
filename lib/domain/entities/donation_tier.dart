@@ -1,3 +1,7 @@
+/// 寄付の金額（価格）はGoogle Play Console／App Store Connect側の商品設定で
+/// 決まる（このファイルでは価格を扱わない）。寄付は金額を問わず1回でも行うと
+/// 広告が非表示になる仕様のため、商品を登録する際は最小の`donation_small`を
+/// 100円以上に設定すること。
 class DonationTier {
   final String productId; // Google Play Console / App Store Connect の商品IDと一致させる
   final String label;

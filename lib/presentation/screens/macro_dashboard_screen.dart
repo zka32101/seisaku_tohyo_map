@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import '../../application/providers/dashboard_provider.dart';
+import '../../infrastructure/local_storage/activity_store.dart';
 import '../navigation/navigation_helpers.dart';
 import '../theme/app_theme.dart';
+import '../widgets/ad_banner_widget.dart';
 import '../widgets/chart_axis.dart';
 import '../widgets/offline_banner.dart';
 import '../widgets/vote_reminder_banner.dart';
@@ -537,52 +539,56 @@ class MacroDashboardScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    const Text('☕', style: TextStyle(fontSize: 24)),
-                    const SizedBox(width: AppSpacing.md),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '広告なしで運営しています',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
+              if (ActivityStore().donationCount == 0) ...[
+                const Center(child: AdBannerWidget()),
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.card),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('☕', style: TextStyle(fontSize: 24)),
+                      const SizedBox(width: AppSpacing.md),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '寄付で広告を非表示にできます',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '気に入ったら寄付で応援いただけると嬉しいです',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textMuted,
+                            Text(
+                              '一度でもご寄付いただくと、以降広告が表示されなくなります',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textMuted,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.pushScreenWithTransition(
-                          const DonationScreen(),
-                          screenName: 'Donation',
-                        );
-                      },
-                      child: const Text('応援する'),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: () {
+                          context.pushScreenWithTransition(
+                            const DonationScreen(),
+                            screenName: 'Donation',
+                          );
+                        },
+                        child: const Text('応援する'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.lg),
+              ],
             ],
           );
         },
