@@ -28,7 +28,14 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_frameworks!
+  # google_mobile_adsはstatic_framework = trueを宣言しており、vendored static
+  # XCFramework（GoogleMobileAds.framework）のプライベートヘッダーを含むため、
+  # 動的フレームワークリンク（デフォルトのuse_frameworks!）のままだと
+  # "Include of non-modular header inside framework module
+  # 'google_mobile_ads.FLTAd_Internal'" というビルドエラーになる
+  # （Google Mobile Ads Flutter pluginの既知の問題、公式に案内されている回避策）。
+  # :linkage => :static を指定し、全Pod含めstaticフレームワークとしてリンクする。
+  use_frameworks! :linkage => :static
   # Firebase.h等、モジュールとして書かれていないヘッダーをObjective-C側から
   # importしているPod（firebase_messagingが依存するFirebase umbrella header等）があり、
   # use_frameworks! のみだと "Include of non-modular header inside framework module"
