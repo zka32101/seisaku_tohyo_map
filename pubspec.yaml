@@ -65,6 +65,9 @@ dependencies:
   # 寄付機能（Google Play課金）
   in_app_purchase: ^3.2.0
 
+  # 広告（寄付すると非表示になる）
+  google_mobile_ads: ^9.1.0
+
   # Local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0

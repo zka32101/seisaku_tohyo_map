@@ -30,6 +30,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- AdMob App ID. This is currently Google's public TEST App ID
+	     (https://developers.google.com/admob/ios/test-ads) and must be replaced
+	     with the real AdMob App ID for this app before a store release, otherwise
+	     only test ads will ever be shown. -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
